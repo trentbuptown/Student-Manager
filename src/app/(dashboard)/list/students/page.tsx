@@ -10,6 +10,7 @@ type Student = {
     id: number;
     studentId: string;
     name: string;
+    surname: string;
     email?: string;
     class: string;
     grade: number;
@@ -33,7 +34,11 @@ const columns = [
         accessor: "grade",
         className: "hidden md:table-cell",
     },
-
+    {
+        header: "Lớp",
+        accessor: "class",
+        className: "hidden md:table-cell",
+    },
     {
         header: "Số điện thoại",
         accessor: "phone",
@@ -71,6 +76,7 @@ const StudentListPage = () => {
             </td>
             <td className="hidden md:table-cell">{item.studentId}</td>
             <td className="hidden md:table-cell">{item.grade}</td>
+            <td className="hidden md:table-cell">{item.class}</td>
             <td className="hidden md:table-cell">{item.phone}</td>
             <td className="hidden md:table-cell">{item.address}</td>
             <td>

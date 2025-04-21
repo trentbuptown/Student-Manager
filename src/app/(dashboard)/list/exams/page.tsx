@@ -12,6 +12,7 @@ type Exam = {
     class: string;
     teacher: string;
     date: string;
+    startTime: string;
 };
 
 const columns = [
@@ -34,6 +35,11 @@ const columns = [
         className: "hidden md:table-cell",
     },
     {
+        header: "Giờ kiểm tra ",
+        accessor: "startTime",
+        className: "hidden md:table-cell",
+    },
+    {
         header: "Chỉnh sửa ",
         accessor: "action",
     },
@@ -49,7 +55,7 @@ const ExamListPage = () => {
             <td>{item.class}</td>
             <td className="hidden md:table-cell">{item.teacher}</td>
             <td className="hidden md:table-cell">{item.date}</td>
-
+            <td className="hidden md:table-cell">{item.startTime}</td>
             <td>
                 <div className="flex items-center gap-2">
                     {role === "admin" && (

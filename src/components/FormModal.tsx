@@ -4,13 +4,20 @@ import { on } from "events";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { JSX, useState } from "react";
-// import TeacherForm from "./forms/TeacherForm";
-// import StudentForm from "./forms/StudentForm";
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
     loading: () => <p>Loading...</p>,
 });
 const StudentForm = dynamic(() => import("./forms/StudentForm"), {
+    loading: () => <p>Loading...</p>,
+});
+const ClassForm = dynamic(() => import("./forms/ClassForm"), {
+    loading: () => <p>Loading...</p>,
+});
+const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
+    loading: () => <p>Loading...</p>,
+});
+const ReportForm = dynamic(() => import("./forms/ReportForm"), {
     loading: () => <p>Loading...</p>,
 });
 
@@ -19,6 +26,9 @@ const forms: {
 } = {
     teacher: (type, data) => <TeacherForm type={type} data={data} />,
     student: (type, data) => <StudentForm type={type} data={data} />,
+    class: (type, data) => <ClassForm type={type} data={data} />,
+    subject: (type, data) => <SubjectForm type={type} data={data} />,
+    report: (type, data) => <ReportForm type={type} data={data} />,
 };
 
 const FormModal = ({
@@ -39,7 +49,8 @@ const FormModal = ({
         | "result"
         | "event"
         | "parent"
-        | "exam";
+        | "exam"
+        | "report";
 
     type: "create" | "update" | "delete";
     data?: any;
