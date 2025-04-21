@@ -2,54 +2,106 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import InputField from "../InputField";
 import Image from "next/image";
+import { CldUploadWidget } from "next-cloudinary";
+import { teacherSchema, TeacherSchema } from "@/lib/formValidationSchemas";
+import { subjectsData } from "@/lib/data";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-const schema = z.object({
-    username: z
-        .string()
-        .min(3, { message: "Tên người dùng phải chứa ít nhất 4 ký tự. " })
-        .max(20, {
-            message: "Tên người dùng không được vượt quá 20 ký tự.",
-        }),
-    email: z.string().email({
-        message: "Email không hợp lệ.",
-    }),
-    password: z
-        .string()
-        .min(8, { message: "Mật khẩu phải chứa ít nhất 8 ký tự. " }),
-    firstName: z.string().min(1, { message: "Vui lòng nhập tên. " }),
-    lastName: z.string().min(1, { message: "Vui lòng nhập họ." }),
-    phone: z.string().min(1, { message: "Vui lòng nhập số điện thoại. " }),
-    address: z.string().min(1, { message: "Vui lòng nhập địa chỉ. " }),
-    birthday: z.date({ message: "Vui lòng nhập ngày sinh. " }),
-    sex: z.enum(["male", "female"], { message: "Vui lòng nhập giới tính. " }),
-    img: z.instanceof(File, { message: "Vui lòng nhập hình ảnh. " }),
-});
+type Subject = {
+    id: number;
+    subjectId: string;
+    name: string;
+    teachers: string[];
+};
 
 const TeacherForm = ({
     type,
     data,
+    subjects = subjectsData,
 }: {
     type: "create" | "update";
     data?: any;
+    subjects?: Subject[];
 }) => {
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Save the uploaded image info
+    const [imgInfo, setImgInfo] = useState<any>(data?.imgInfo || null);
+
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm({ resolver: zodResolver(schema) });
+        setValue,
+        watch,
+    } = useForm({
+        resolver: zodResolver(teacherSchema),
+        // If data exists, use it as default values
+        defaultValues: data
+            ? {
+                  id: data.id,
+                  name: data.name,
+                  subjects: data.teachers,
+                  img: data.img,
+              }
+            : undefined,
+    });
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
+    // Watch the image URL to display a preview
+    const imgValue = watch("img");
+
+    const onSubmit = handleSubmit(async (formData) => {
+        try {
+            setIsSubmitting(true);
+            setError(null);
+
+            // Add the image information to the form data
+            const dataToSubmit = {
+                ...formData,
+                imgInfo: imgInfo, // Include the complete image info object
+            };
+
+            console.log("Submitting data:", dataToSubmit);
+
+            // Add logic to send data to API here
+            // const response = await fetch('/api/teachers', {
+            //   method: type === "create" ? "POST" : "PUT",
+            //   headers: { "Content-Type": "application/json" },
+            //   body: JSON.stringify(dataToSubmit)
+            // });
+
+            toast.success(
+                type === "create"
+                    ? "Thêm giáo viên thành công"
+                    : "Cập nhật giáo viên thành công"
+            );
+
+            // Redirect after successful creation/update
+            // router.push("/teachers");
+        } catch (err) {
+            console.error(err);
+            setError("Something went wrong when submitting the form");
+            toast.error("Failed to process your request");
+        } finally {
+            setIsSubmitting(false);
+        }
     });
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
             <div className="flex items-center gap-2">
                 <Image src="/adduser.png" alt="" width={40} height={40} />
-                <h1 className="text-xl font-semibold"> Thêm giáo viên mới</h1>
+                <h1 className="text-xl font-semibold">
+                    {type === "create"
+                        ? "Thêm giáo viên mới"
+                        : "Chỉnh sửa giáo viên"}
+                </h1>
             </div>
             <span className="text-xs text-gray-400 font-medium">
                 Thông tin xác thực
@@ -85,16 +137,16 @@ const TeacherForm = ({
                 <InputField
                     label="Tên"
                     name="firstName"
-                    defaultValue={data?.firstName}
+                    defaultValue={data?.name}
                     register={register}
-                    error={errors.firstName}
+                    error={errors.name}
                 />
                 <InputField
                     label="Họ"
                     name="lastName"
-                    defaultValue={data?.lastName}
+                    defaultValue={data?.surname}
                     register={register}
-                    error={errors.lastName}
+                    error={errors.surname}
                 />
                 <InputField
                     label="Số điện thoại"
@@ -125,8 +177,8 @@ const TeacherForm = ({
                         {...register("sex")}
                         defaultValue={data?.sex}
                     >
-                        <option value="female">Female</option>
-                        <option value="male">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="MALE">Male</option>
                     </select>
                     {errors.sex?.message && (
                         <p className="text-xs text-red-400">
@@ -134,34 +186,113 @@ const TeacherForm = ({
                         </p>
                     )}
                 </div>
-                <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center mt-2">
-                    <label
-                        className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-                        htmlFor="img"
+                <div className="flex flex-col gap-2 w-full md:w-1/4">
+                    <label className="text-xs text-gray-500">Môn học</label>
+                    <select
+                        multiple
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("subjects")}
+                        defaultValue={data?.subjects}
                     >
-                        <Image
-                            src="/upload.png"
-                            alt=""
-                            width={28}
-                            height={28}
-                        />
-                        <span>Upload a photo</span>
-                    </label>
-                    <input
-                        type="file"
-                        id="img"
-                        {...register("img")}
-                        className="hidden"
-                    />
-                    {errors.img?.message && (
+                        {subjects.map(
+                            (subject: { id: number; name: string }) => (
+                                <option value={subject.id} key={subject.id}>
+                                    {subject.name}
+                                </option>
+                            )
+                        )}
+                    </select>
+                    {errors.subjects?.message && (
                         <p className="text-xs text-red-400">
-                            {errors.img.message.toString()}
+                            {errors.subjects.message.toString()}
                         </p>
                     )}
                 </div>
+
+                {/* Image Upload Section */}
+                <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center mt-2">
+                    <label className="text-xs text-gray-500 block mb-2">
+                        Ảnh cá nhân
+                    </label>
+                    <div className="flex items-center gap-4">
+                        {/* Show image preview if available */}
+                        {imgValue && (
+                            <div className="h-20 w-20 relative rounded-md overflow-hidden">
+                                <Image
+                                    src={imgValue}
+                                    alt="Ảnh đại diện"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
+
+                        <CldUploadWidget
+                            uploadPreset="school"
+                            onSuccess={(result: any, { widget }) => {
+                                // Update the form with the image URL
+                                const info = result.info;
+                                setImgInfo(info);
+                                setValue("img", info.secure_url);
+                                widget.close();
+
+                                // Show success message
+                                toast.success("Tải ảnh thành công");
+                            }}
+                        >
+                            {({ open }) => {
+                                return (
+                                    <div
+                                        className="flex items-center gap-2 cursor-pointer p-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                                        onClick={() => open()}
+                                    >
+                                        <Image
+                                            src="/upload.png"
+                                            alt=""
+                                            width={24}
+                                            height={24}
+                                        />
+                                        <span className="text-sm">
+                                            {imgValue
+                                                ? "Đổi ảnh đại diện"
+                                                : "Tải ảnh đại diện"}
+                                        </span>
+                                    </div>
+                                );
+                            }}
+                        </CldUploadWidget>
+
+                        {/* Add option to remove the image */}
+                        {imgValue && (
+                            <button
+                                type="button"
+                                className="text-sm text-red-500 hover:text-red-700"
+                                onClick={() => {
+                                    setValue("img", "");
+                                    setImgInfo(null);
+                                }}
+                            >
+                                Remove
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Hidden input field to store the image URL */}
+                    <input type="hidden" {...register("img")} />
+                </div>
             </div>
-            <button className="bg-blue-400 text-white p-2 rounded-md">
-                {type === "create" ? "Create" : "Update"}
+
+            {error && <span className="text-red-500">{error}</span>}
+
+            <button
+                className="bg-blue-400 text-white p-2 rounded-md hover:bg-blue-500 transition-colors disabled:bg-gray-300"
+                disabled={isSubmitting}
+            >
+                {isSubmitting
+                    ? "Processing..."
+                    : type === "create"
+                    ? "Thêm mới"
+                    : "Cập nhật"}
             </button>
         </form>
     );
