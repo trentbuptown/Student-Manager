@@ -1,68 +1,81 @@
 import Pagination from "@/components/Pagination";
 import Image from "next/image";
 import Link from "next/link";
-import { role, examsData } from "@/lib/data";
+import { role, resultsData } from "@/lib/data";
 import TableSearch from "@/components/TableSearch";
 import Table from "@/components/Table";
 import FormModal from "@/components/FormModal";
 
-type Exam = {
+type Result = {
     id: number;
     subject: string;
     class: string;
     teacher: string;
+    student: string;
+    type: "exam" | "assignment";
     date: string;
-    startTime: string;
+    score: number;
 };
 
 const columns = [
     {
-        header: "Môn học kiểm tra ",
+        header: "Tên môn học ",
         accessor: "name",
     },
     {
-        header: "Lớp ",
-        accessor: "class",
+        header: "Học sinh",
+        accessor: "student",
     },
     {
-        header: "Giáo viên ",
+        header: "Điểm",
+        accessor: "score",
+        className: "hidden md:table-cell",
+    },
+    {
+        header: "Giáo viên",
         accessor: "teacher",
         className: "hidden md:table-cell",
     },
     {
-        header: "Ngày ",
+        header: "Lớp",
+        accessor: "class",
+        className: "hidden md:table-cell",
+    },
+    {
+        header: "Ngày",
         accessor: "date",
         className: "hidden md:table-cell",
     },
     {
-        header: "Giờ kiểm tra ",
-        accessor: "startTime",
-        className: "hidden md:table-cell",
-    },
-    {
-        header: "Chỉnh sửa ",
+        header: "Actions",
         accessor: "action",
     },
 ];
 
-const ExamListPage = () => {
-    const renderRow = (item: Exam) => (
+const ResultListPage = () => {
+    const renderRow = (item: Result) => (
         <tr
             key={item.id}
             className="border-b border-gray-200 text-sm even:bg-slate-50 hover:bg-[var(--light-blue)]"
         >
             <td className="flex items-center gap-4 p-4">{item.subject}</td>
-            <td>{item.class}</td>
+            <td>{item.student}</td>
+            <td className="hidden md:table-cell">{item.score}</td>
             <td className="hidden md:table-cell">{item.teacher}</td>
+            <td className="hidden md:table-cell">{item.class}</td>
             <td className="hidden md:table-cell">{item.date}</td>
-            <td className="hidden md:table-cell">{item.startTime}</td>
+
             <td>
                 <div className="flex items-center gap-2">
                     {role === "admin" && (
                         <>
-                            <FormModal table="exam" type="update" data={item} />
                             <FormModal
-                                table="exam"
+                                table="result"
+                                type="update"
+                                data={item}
+                            />
+                            <FormModal
+                                table="result"
                                 type="delete"
                                 id={item.id}
                             />
@@ -78,7 +91,7 @@ const ExamListPage = () => {
             {/* Title */}
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold hidden md:block ">
-                    Lịch kiểm tra
+                    Điểm số
                 </h1>
                 <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
                     <TableSearch />
@@ -100,16 +113,16 @@ const ExamListPage = () => {
                             />
                         </button>
                         {role === "admin" && (
-                            <FormModal table="exam" type="create" />
+                            <FormModal table="result" type="create" />
                         )}
                     </div>
                 </div>
             </div>
-            <Table columns={columns} renderRow={renderRow} data={examsData} />
+            <Table columns={columns} renderRow={renderRow} data={resultsData} />
 
             <Pagination />
         </div>
     );
 };
 
-export default ExamListPage;
+export default ResultListPage;

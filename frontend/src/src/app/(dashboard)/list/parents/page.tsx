@@ -1,68 +1,72 @@
 import Pagination from "@/components/Pagination";
 import Image from "next/image";
 import Link from "next/link";
-import { role, examsData } from "@/lib/data";
+import { role, parentsData } from "@/lib/data";
 import TableSearch from "@/components/TableSearch";
 import Table from "@/components/Table";
 import FormModal from "@/components/FormModal";
 
-type Exam = {
+type Parent = {
     id: number;
-    subject: string;
-    class: string;
-    teacher: string;
-    date: string;
-    startTime: string;
+    students: string[];
+    name: string;
+    email?: string;
+    phone?: string;
+    address: string;
 };
 
 const columns = [
     {
-        header: "Môn học kiểm tra ",
-        accessor: "name",
+        header: "Thông tin",
+        accessor: "Info",
     },
     {
-        header: "Lớp ",
-        accessor: "class",
-    },
-    {
-        header: "Giáo viên ",
-        accessor: "teacher",
+        header: "Phụ huynh của",
+        accessor: "students",
         className: "hidden md:table-cell",
     },
     {
-        header: "Ngày ",
-        accessor: "date",
+        header: "Số điện thoại",
+        accessor: "phone",
         className: "hidden md:table-cell",
     },
     {
-        header: "Giờ kiểm tra ",
-        accessor: "startTime",
+        header: "Địa chỉ",
+        accessor: "address",
         className: "hidden md:table-cell",
     },
     {
-        header: "Chỉnh sửa ",
-        accessor: "action",
+        header: "Chỉnh sửa",
+        accessor: "actions",
     },
 ];
 
-const ExamListPage = () => {
-    const renderRow = (item: Exam) => (
+const ParentListPage = () => {
+    const renderRow = (item: Parent) => (
         <tr
             key={item.id}
             className="border-b border-gray-200 text-sm even:bg-slate-50 hover:bg-[var(--light-blue)]"
         >
-            <td className="flex items-center gap-4 p-4">{item.subject}</td>
-            <td>{item.class}</td>
-            <td className="hidden md:table-cell">{item.teacher}</td>
-            <td className="hidden md:table-cell">{item.date}</td>
-            <td className="hidden md:table-cell">{item.startTime}</td>
+            <td className="flex items-center gap-4 p-4">
+                <div className="flex flex-col">
+                    <h3 className="font-semibold">{item.name}</h3>
+                    <p className="text-xs text-gray-500">{item.email}</p>
+                </div>
+            </td>
+            <td className="hidden md:table-cell">{item.students.join(", ")}</td>
+            <td className="hidden md:table-cell">{item.phone}</td>
+            <td className="hidden md:table-cell">{item.address}</td>
             <td>
                 <div className="flex items-center gap-2">
                     {role === "admin" && (
                         <>
-                            <FormModal table="exam" type="update" data={item} />
                             <FormModal
-                                table="exam"
+                                table="parent"
+                                type="update"
+                                data={item}
+                            />
+                            <FormModal
+                                table="parent"
                                 type="delete"
                                 id={item.id}
                             />
@@ -78,7 +82,7 @@ const ExamListPage = () => {
             {/* Title */}
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold hidden md:block ">
-                    Lịch kiểm tra
+                    Danh sách phụ huynh
                 </h1>
                 <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
                     <TableSearch />
@@ -100,16 +104,16 @@ const ExamListPage = () => {
                             />
                         </button>
                         {role === "admin" && (
-                            <FormModal table="exam" type="create" />
+                            <FormModal table="parent" type="create" />
                         )}
                     </div>
                 </div>
             </div>
-            <Table columns={columns} renderRow={renderRow} data={examsData} />
+            <Table columns={columns} renderRow={renderRow} data={parentsData} />
 
             <Pagination />
         </div>
     );
 };
 
-export default ExamListPage;
+export default ParentListPage;

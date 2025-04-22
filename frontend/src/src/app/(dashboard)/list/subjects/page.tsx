@@ -1,68 +1,59 @@
 import Pagination from "@/components/Pagination";
 import Image from "next/image";
 import Link from "next/link";
-import { role, examsData } from "@/lib/data";
+import { role, subjectsData } from "@/lib/data";
 import TableSearch from "@/components/TableSearch";
 import Table from "@/components/Table";
 import FormModal from "@/components/FormModal";
 
-type Exam = {
+type Subject = {
     id: number;
-    subject: string;
-    class: string;
-    teacher: string;
-    date: string;
-    startTime: string;
+    subjectId: string;
+    name: string;
+    teachers: string[];
 };
 
 const columns = [
     {
-        header: "Môn học kiểm tra ",
+        header: "Tên môn học",
         accessor: "name",
     },
     {
-        header: "Lớp ",
-        accessor: "class",
-    },
-    {
-        header: "Giáo viên ",
-        accessor: "teacher",
+        header: "Mã môn học",
+        accessor: "subjectId",
         className: "hidden md:table-cell",
     },
     {
-        header: "Ngày ",
-        accessor: "date",
+        header: "Giáo viên giảng dạy",
+        accessor: "teachers",
         className: "hidden md:table-cell",
     },
     {
-        header: "Giờ kiểm tra ",
-        accessor: "startTime",
-        className: "hidden md:table-cell",
-    },
-    {
-        header: "Chỉnh sửa ",
-        accessor: "action",
+        header: "Chỉnh sửa",
+        accessor: "actions",
     },
 ];
 
-const ExamListPage = () => {
-    const renderRow = (item: Exam) => (
+const SubjectListPage = () => {
+    const renderRow = (item: Subject) => (
         <tr
             key={item.id}
             className="border-b border-gray-200 text-sm even:bg-slate-50 hover:bg-[var(--light-blue)]"
         >
-            <td className="flex items-center gap-4 p-4">{item.subject}</td>
-            <td>{item.class}</td>
-            <td className="hidden md:table-cell">{item.teacher}</td>
-            <td className="hidden md:table-cell">{item.date}</td>
-            <td className="hidden md:table-cell">{item.startTime}</td>
+            <td className="flex items-center gap-4 p-4">{item.name}</td>
+            <td className="hidden md:table-cell">{item.subjectId}</td>
+            <td className="hidden md:table-cell">{item.teachers.join(", ")}</td>
             <td>
                 <div className="flex items-center gap-2">
                     {role === "admin" && (
                         <>
-                            <FormModal table="exam" type="update" data={item} />
                             <FormModal
-                                table="exam"
+                                table="subject"
+                                type="update"
+                                data={item}
+                            />
+                            <FormModal
+                                table="subject"
                                 type="delete"
                                 id={item.id}
                             />
@@ -78,7 +69,7 @@ const ExamListPage = () => {
             {/* Title */}
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold hidden md:block ">
-                    Lịch kiểm tra
+                    Danh sách môn học
                 </h1>
                 <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
                     <TableSearch />
@@ -100,16 +91,20 @@ const ExamListPage = () => {
                             />
                         </button>
                         {role === "admin" && (
-                            <FormModal table="exam" type="create" />
+                            <FormModal table="subject" type="create" />
                         )}
                     </div>
                 </div>
             </div>
-            <Table columns={columns} renderRow={renderRow} data={examsData} />
+            <Table
+                columns={columns}
+                renderRow={renderRow}
+                data={subjectsData}
+            />
 
             <Pagination />
         </div>
     );
 };
 
-export default ExamListPage;
+export default SubjectListPage;
