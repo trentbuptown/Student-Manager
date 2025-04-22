@@ -1,0 +1,19 @@
+(globalThis.TURBOPACK = globalThis.TURBOPACK || []).push([
+    "static/chunks/src_app_(dashboard)_list_teachers_[id]_page_tsx_d272db7c._.js",
+    {},
+]);
+(globalThis.TURBOPACK_CHUNK_LISTS = globalThis.TURBOPACK_CHUNK_LISTS || []).push({
+  "path": "static/chunks/src_app_(dashboard)_list_teachers_[id]_page_tsx_d272db7c._.js",
+  "chunks": [
+    "static/chunks/node_modules_lodash_e7f6fe44._.js",
+    "static/chunks/node_modules_@popperjs_core_lib_c305c6ec._.js",
+    "static/chunks/node_modules_react-big-calendar_dist_react-big-calendar_esm_70e6c142.js",
+    "static/chunks/node_modules_moment_5ca36423._.js",
+    "static/chunks/node_modules_recharts_es6_29f6c739._.js",
+    "static/chunks/node_modules_zod_lib_index_mjs_ee760afb._.js",
+    "static/chunks/node_modules_444aaca0._.js",
+    "static/chunks/src_94cc15bf._.js",
+    "static/chunks/node_modules_react-big-calendar_lib_css_react-big-calendar_75a787d3.css"
+  ],
+  "source": "dynamic"
+});
