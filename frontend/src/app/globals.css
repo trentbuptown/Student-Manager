@@ -16,6 +16,61 @@
     --purple-icon: #8785ff;
     --yellow-icon: #ffae41;
     --pink-icon: #ff8ce6;
+
+    --font-size-base: 16px;
+    --background-color: #ffffff;
+    --text-color: #000000;
+}
+
+.dark {
+    --background-color: #1a1a1a;
+    --text-color: #ffffff;
+}
+
+body {
+    font-size: var(--font-size-base);
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Dark mode styles */
+.dark body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.dark .bg-white {
+    background-color: #2a2a2a;
+}
+
+.dark .text-gray-900 {
+    color: #ffffff;
+}
+
+.dark .text-gray-500 {
+    color: #a0aec0;
+}
+
+.dark .border-gray-200 {
+    border-color: #2d3748;
+}
+
+/* Input styles */
+.dark select,
+.dark input {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border-color: #4a5568;
+}
+
+.dark select option {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+/* Transition */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .react-calendar {

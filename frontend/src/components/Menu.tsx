@@ -9,7 +9,7 @@ const menuItems = [
             {
                 icon: "/home.png",
                 label: "Trang chủ",
-                href: "/",
+                href: "/dashboard",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
@@ -69,7 +69,7 @@ const menuItems = [
             {
                 icon: "/attendance.png",
                 label: "Điểm danh",
-                href: "/list/attendance",
+                href: "/attendance",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {
@@ -81,7 +81,7 @@ const menuItems = [
             {
                 icon: "/message.png",
                 label: "Quy định",
-                href: "/list/messages",
+                href: "/messages",
                 visible: ["admin", "teacher", "student", "parent"],
             },
             {

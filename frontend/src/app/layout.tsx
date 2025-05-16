@@ -1,14 +1,18 @@
-import type { Metadata } from "next";
+'use client';
+
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from 'react-hot-toast';
+import { SettingsProvider } from '@/contexts/SettingsContext';
+import { useApplySettings } from '@/hooks/useApplySettings';
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-    title: "SGU SMS",
-    description: "Hệ thống quản lý sinh viên trường Đại học Sài Gòn",
-};
+// Component để áp dụng settings
+function ApplySettings({ children }: { children: React.ReactNode }) {
+    useApplySettings();
+    return <>{children}</>;
+}
 
 export default function RootLayout({
     children,
@@ -16,10 +20,14 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body className={inter.className}>
-                {children}
-                <ToastContainer position="bottom-right" theme="dark" />
+                <SettingsProvider>
+                    <ApplySettings>
+                        {children}
+                        <Toaster position="top-right" />
+                    </ApplySettings>
+                </SettingsProvider>
             </body>
         </html>
     );
