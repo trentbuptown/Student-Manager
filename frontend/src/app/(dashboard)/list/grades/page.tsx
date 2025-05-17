@@ -69,20 +69,14 @@ const ClassManagementPage = () => {
     const fetchGrades = async () => {
         try {
             setLoading(true);
-            const data = await getAllGrades();
-            if (Array.isArray(data)) {
-                setGrades(data);
-                setTotalPages(Math.ceil(data.length / 10));
-            } else {
-                setGrades([]);
-                setTotalPages(1);
-                toast.error("Dữ liệu khối lớp không hợp lệ");
+            const response = await getAllGrades();
+            if (response.status === "success") {
+                setGrades(response.data);
+                setTotalPages(Math.ceil(response.data.length / 10));
             }
         } catch (error) {
             console.error("Error fetching grades:", error);
             toast.error("Không thể tải danh sách khối lớp");
-            setGrades([]);
-            setTotalPages(1);
         } finally {
             setLoading(false);
         }
@@ -92,20 +86,14 @@ const ClassManagementPage = () => {
     const fetchClasses = async () => {
         try {
             setLoading(true);
-            const data = await getClasses();
-            if (Array.isArray(data)) {
-                setClasses(data);
-                setTotalPages(Math.ceil(data.length / 10));
-            } else {
-                setClasses([]);
-                setTotalPages(1);
-                toast.error("Dữ liệu lớp học không hợp lệ");
+            const response = await getClasses();
+            if (response.status === "success") {
+                setClasses(response.data);
+                setTotalPages(Math.ceil(response.data.length / 10));
             }
         } catch (error) {
             console.error("Error fetching classes:", error);
             toast.error("Không thể tải danh sách lớp học");
-            setClasses([]);
-            setTotalPages(1);
         } finally {
             setLoading(false);
         }
@@ -117,35 +105,20 @@ const ClassManagementPage = () => {
     }, []);
 
     const handleSearch = (term: string) => {
-        if (activeTab === "classes") {
-            // Lọc dữ liệu lớp học dựa trên từ khóa tìm kiếm
-            const filtered = term
-                ? classes.filter(
-                      (c) =>
-                          c.name.toLowerCase().includes(term.toLowerCase()) ||
-                          c.grade?.name
-                              .toLowerCase()
-                              .includes(term.toLowerCase()) ||
-                          c.supervisor
-                              .toLowerCase()
-                              .includes(term.toLowerCase())
-                  )
-                : classes;
-            setClasses(filtered);
-            setTotalPages(Math.ceil(filtered.length / 10));
-        } else {
-            // Lọc dữ liệu khối lớp dựa trên từ khóa tìm kiếm
-            const filtered = term
-                ? grades.filter(
-                      (g) =>
-                          g.name.toLowerCase().includes(term.toLowerCase()) ||
-                          (g.classes_count?.toString() || "0").includes(term)
-                  )
-                : grades;
-            setGrades(filtered);
-            setTotalPages(Math.ceil(filtered.length / 10));
-        }
+        // Lọc dữ liệu dựa trên từ khóa tìm kiếm
+        const filtered = term
+            ? classes.filter(
+                  (c) =>
+                      c.name.toLowerCase().includes(term.toLowerCase()) ||
+                      c.grade?.name
+                          .toLowerCase()
+                          .includes(term.toLowerCase()) ||
+                      c.supervisor.toLowerCase().includes(term.toLowerCase())
+              )
+            : classes;
+        setClasses(filtered);
         setCurrentPage(1);
+        setTotalPages(Math.ceil(filtered.length / 10));
     };
 
     const handleDeleteClass = async (id: number) => {
@@ -391,11 +364,25 @@ const ClassManagementPage = () => {
                                 <TableSearch onSearch={handleSearch} />
                                 <div className="flex gap-4 items-center self-end">
                                     {role === "admin" && (
-                                        <FormModal
-                                            table="grade"
-                                            type="create"
-                                            onSuccess={fetchGrades}
-                                        />
+                                        <button
+                                            className="w-8 h-8 bg-[var(--yellow-pastel)] flex items-center justify-center rounded-full cursor-pointer"
+                                            onClick={() => {
+                                                document
+                                                    .getElementById(
+                                                        "createGradeModal"
+                                                    )
+                                                    ?.classList.remove(
+                                                        "hidden"
+                                                    );
+                                            }}
+                                        >
+                                            <Image
+                                                src="/create.png"
+                                                alt="Tạo mới"
+                                                width={16}
+                                                height={16}
+                                            />
+                                        </button>
                                     )}
                                 </div>
                             </div>

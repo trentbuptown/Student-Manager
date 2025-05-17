@@ -1,6 +1,5 @@
 import Pagination from "@/components/Pagination";
 import Image from "next/image";
-import Link from "next/link";
 import { role, classesData } from "@/lib/data";
 import TableSearch from "@/components/TableSearch";
 import Table from "@/components/Table";
@@ -103,8 +102,6 @@ const SubjectListPage = () => {
                 </div>
             </div>
             <Table columns={columns} renderRow={renderRow} data={classesData} />
-
-            <Pagination />
         </div>
     );
 };

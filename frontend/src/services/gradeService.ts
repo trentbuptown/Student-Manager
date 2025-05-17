@@ -1,207 +1,111 @@
+import axios from "axios";
 import { toast } from "react-toastify";
 
 export type Grade = {
-  id: number;
-  name: string;
-  classes?: any[];
-  created_at?: string;
-  updated_at?: string;
+    id: number;
+    name: string;
+    classes?: Class[];
+    classes_count?: number;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type Class = {
+    id: number;
+    name: string;
+    grade_id: number;
+    teacher_id?: number;
 };
 
 export type GradeCreateParams = {
-  name: string;
+    name: string;
 };
 
 export type GradeUpdateParams = {
-  name?: string;
+    name: string;
 };
 
-// Tạo một hàm API riêng để xử lý các yêu cầu
-const apiRequest = async (url: string, options: RequestInit = {}) => {
-  try {
-    // Xác định đầy đủ URL nếu chỉ nhận đường dẫn tương đối
-    const fullUrl = url.startsWith('http') ? url : `http://127.0.0.1:8000${url}`;
-    
-    // Lấy token từ localStorage
-    const token = localStorage.getItem('token');
-    
-    // Tạo headers với token nếu có
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      ...(options.headers || {})
-    };
-    
-    const response = await fetch(fullUrl, {
-      ...options,
-      headers,
-      credentials: 'include',
-    });
-    
-    // Kiểm tra lỗi xác thực
-    if (response.status === 401) {
-      console.error('Lỗi xác thực: Chưa đăng nhập hoặc phiên đăng nhập đã hết hạn');
-      
-      // Xóa token và cookie
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      
-      // Chuyển hướng đến trang đăng nhập nếu không phải đang ở trang đăng xuất
-      if (!window.location.pathname.includes('/logout')) {
-        window.location.href = '/sign-in';
-      }
-      
-      throw new Error('Lỗi xác thực: Chưa đăng nhập hoặc phiên đăng nhập đã hết hạn');
-    }
-    
-    return response;
-  } catch (error) {
-    console.error('API Request error:', error);
-    throw error;
-  }
-};
+const API_URL = "http://localhost:8000/api";
 
-// Lấy danh sách tất cả khối
 export const getAllGrades = async (): Promise<Grade[]> => {
-  try {
-    const response = await apiRequest('/api/grades');
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Lỗi API:', errorData);
-      return [];
+    try {
+        const response = await axios.get(`${API_URL}/grades`);
+        return response.data.data;
+    } catch (error) {
+        console.error("Error fetching grades:", error);
+        toast.error("Không thể lấy danh sách khối lớp");
+        throw error;
     }
-    
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error('Error fetching grades:', error);
-    return [];
-  }
 };
 
-// Lấy thông tin chi tiết một khối
-export const getGradeById = async (id: number): Promise<Grade | null> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    // Sử dụng apiRequest thay vì fetch trực tiếp
-    const response = await apiRequest(`/api/grades/${id}`, {
-      method: 'GET',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      console.warn(`Server trả về lỗi khi lấy khối ${id}:`, response.status);
-      return null;
+export const getGradeById = async (id: number): Promise<Grade> => {
+    try {
+        const response = await axios.get(`${API_URL}/grades/${id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error fetching grade ${id}:`, error);
+        toast.error("Không thể lấy thông tin khối lớp");
+        throw error;
     }
-
-    const data = await response.json();
-    return data.data || null;
-  } catch (error) {
-    console.log(`Không thể kết nối tới backend để lấy khối ${id}:`, error);
-    return null;
-  }
 };
 
-// Tạo khối mới
-export const createGrade = async (params: GradeCreateParams): Promise<Grade | null> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    // Sử dụng apiRequest thay vì fetch trực tiếp
-    const response = await apiRequest('/api/grades', {
-      method: 'POST',
-      body: JSON.stringify(params),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.warn('Server trả về lỗi khi tạo khối:', errorData.message || response.status);
-      return null;
+export const createGrade = async (data: GradeCreateParams): Promise<Grade> => {
+    try {
+        const response = await axios.post(`${API_URL}/grades`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            withCredentials: true,
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error("Error creating grade:", error);
+        if (axios.isAxiosError(error) && error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else {
+            toast.error("Không thể tạo khối lớp mới");
+        }
+        throw error;
     }
-
-    const data = await response.json();
-    return data.data || null;
-  } catch (error) {
-    console.log('Không thể kết nối tới backend để tạo khối:', error);
-    return null;
-  }
 };
 
-// Cập nhật thông tin khối
-export const updateGrade = async (id: number, params: GradeUpdateParams): Promise<Grade | null> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    // Sử dụng apiRequest thay vì fetch trực tiếp
-    const response = await apiRequest(`/api/grades/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(params),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.warn(`Server trả về lỗi khi cập nhật khối ${id}:`, errorData.message || response.status);
-      return null;
+export const updateGrade = async (
+    id: number,
+    data: GradeUpdateParams
+): Promise<Grade> => {
+    try {
+        const response = await axios.put(`${API_URL}/grades/${id}`, data, {
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            withCredentials: true,
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error(`Error updating grade ${id}:`, error);
+        if (axios.isAxiosError(error) && error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else {
+            toast.error("Không thể cập nhật khối lớp");
+        }
+        throw error;
     }
-
-    const data = await response.json();
-    return data.data || null;
-  } catch (error) {
-    console.log(`Không thể kết nối tới backend để cập nhật khối ${id}:`, error);
-    return null;
-  }
 };
 
-// Xóa một khối
-export const deleteGrade = async (id: number): Promise<{success: boolean; message?: string}> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    // Sử dụng apiRequest thay vì fetch trực tiếp
-    const response = await apiRequest(`/api/grades/${id}`, {
-      method: 'DELETE',
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeoutId);
-
-    // Xử lý phản hồi
-    const responseData = await response.json();
-    
-    if (!response.ok) {
-      console.warn(`Server trả về lỗi khi xóa khối ${id}:`, responseData.message || response.status);
-      return {
-        success: false,
-        message: responseData.message || "Không thể xóa khối"
-      };
+export const deleteGrade = async (id: number): Promise<void> => {
+    try {
+        await axios.delete(`${API_URL}/grades/${id}`, {
+            withCredentials: true,
+        });
+    } catch (error) {
+        console.error(`Error deleting grade ${id}:`, error);
+        if (axios.isAxiosError(error) && error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else {
+            toast.error("Không thể xóa khối lớp");
+        }
+        throw error;
     }
-
-    return {
-      success: true,
-      message: responseData.message || "Xóa khối thành công"
-    };
-  } catch (error) {
-    console.log(`Không thể kết nối tới backend để xóa khối ${id}:`, error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Lỗi kết nối đến máy chủ"
-    };
-  }
-}; 
+};

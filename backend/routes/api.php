@@ -21,6 +21,10 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register-first-admin', [AuthController::class, 'registerFirstAdmin']);
 
+// Test routes (tạm thời public để test)
+Route::apiResource('grades', GradeController::class);
+Route::apiResource('classes', ClassController::class);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -34,9 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('score-details', ScoreDetailController::class);
-    Route::apiResource('grades', GradeController::class);
     Route::apiResource('rules', RuleController::class);
-    Route::apiResource('classes', ClassController::class);
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('subjects', SubjectController::class);
 

@@ -25,14 +25,30 @@ const ReportForm = dynamic(() => import("./forms/ReportForm"), {
 });
 
 const forms: {
-    [key: string]: (type: "create" | "update", data?: any, onSuccess?: () => void) => JSX.Element;
+    [key: string]: (
+        type: "create" | "update",
+        data?: any,
+        onSuccess?: () => void
+    ) => JSX.Element;
 } = {
-    teacher: (type, data, onSuccess) => <TeacherForm type={type} data={data} onSuccess={onSuccess} />,
-    student: (type, data) => <StudentForm type={type} data={data} />,
-    class: (type, data) => <ClassForm type={type} data={data} />,
-    grade: (type, data) => <GradeForm type={type} data={data} />,
-    subject: (type, data) => <SubjectForm type={type} data={data} />,
-    report: (type, data) => <ReportForm type={type} data={data} />,
+    teacher: (type, data, onSuccess) => (
+        <TeacherForm type={type} data={data} onSuccess={onSuccess} />
+    ),
+    student: (type, data, onSuccess) => (
+        <StudentForm type={type} data={data} onSuccess={onSuccess} />
+    ),
+    class: (type, data, onSuccess) => (
+        <ClassForm type={type} data={data} onSuccess={onSuccess} />
+    ),
+    grade: (type, data, onSuccess) => (
+        <GradeForm type={type} data={data} onSuccess={onSuccess} />
+    ),
+    subject: (type, data, onSuccess) => (
+        <SubjectForm type={type} data={data} onSuccess={onSuccess} />
+    ),
+    report: (type, data, onSuccess) => (
+        <ReportForm type={type} data={data} onSuccess={onSuccess} />
+    ),
 };
 
 const FormModal = ({
@@ -94,14 +110,14 @@ const FormModal = ({
                     Dữ liệu sẽ không thể được khôi phục.
                 </span>
                 <div className="flex gap-8 mt-8">
-                    <button 
+                    <button
                         className="bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
                         onClick={() => setOpen(false)}
                         type="button"
                     >
                         Hủy
                     </button>
-                    <button 
+                    <button
                         className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
                         onClick={handleSuccess}
                         type="button"

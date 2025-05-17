@@ -11,9 +11,7 @@ import { createGrade, updateGrade } from "@/services/gradeService";
 
 // Định nghĩa schema xác thực cho form khối
 const gradeSchema = z.object({
-    id: z.coerce.number().optional(),
     name: z.string().min(1, { message: "Vui lòng nhập tên khối." }),
-    description: z.string().optional()
 });
 
 type GradeSchema = z.infer<typeof gradeSchema>;
@@ -21,8 +19,8 @@ type GradeSchema = z.infer<typeof gradeSchema>;
 type Grade = {
     id: number;
     name: string;
-    description?: string;
     classes?: any[];
+    classes_count?: number;
 };
 
 const GradeForm = ({
@@ -41,75 +39,41 @@ const GradeForm = ({
         register,
         handleSubmit,
         formState: { errors },
-        reset
+        reset,
     } = useForm<GradeSchema>({
         resolver: zodResolver(gradeSchema),
-        defaultValues: data || { name: "" }
+        defaultValues: data || { name: "" },
     });
 
     const onSubmit = handleSubmit(async (formData) => {
-        console.log("Form data submitted:", formData);
         setIsSubmitting(true);
         setError(null);
 
         try {
-            // Add direct URL for API call
             if (type === "create") {
-                console.log("Creating new grade:", formData);
-                const response = await fetch('http://127.0.0.1:8000/api/grades', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ name: formData.name }),
-                });
-
-                console.log("Response status:", response.status);
-                const responseData = await response.json();
-                console.log("Response data:", responseData);
-
-                if (!response.ok) {
-                    throw new Error(responseData.message || "Không thể tạo khối");
-                }
-
+                const response = await createGrade(formData);
                 toast.success("Đã tạo khối lớp thành công");
-                reset(); // Reset form sau khi tạo thành công
-
-                if (onSuccess) {
-                    onSuccess();
-                }
+                reset();
             } else if (type === "update" && data?.id) {
-                console.log("Updating grade:", data.id, formData);
-                const response = await fetch(`http://127.0.0.1:8000/api/grades/${data.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ name: formData.name }),
-                });
-
-                console.log("Response status:", response.status);
-                const responseData = await response.json();
-                console.log("Response data:", responseData);
-
-                if (!response.ok) {
-                    throw new Error(responseData.message || "Không thể cập nhật khối");
-                }
-
+                const response = await updateGrade(data.id, formData);
                 toast.success("Đã cập nhật khối lớp thành công");
+            }
 
-                if (onSuccess) {
-                    onSuccess();
-                }
+            if (onSuccess) {
+                onSuccess();
             }
         } catch (err) {
             console.error("Error in form submission:", err);
-            setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi gửi form");
-            toast.error(err instanceof Error ? err.message : "Thất bại khi xử lý yêu cầu");
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Có lỗi xảy ra khi gửi form"
+            );
+            toast.error(
+                err instanceof Error
+                    ? err.message
+                    : "Thất bại khi xử lý yêu cầu"
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -136,27 +100,6 @@ const GradeForm = ({
                     className="w-full"
                     placeholder="Ví dụ: Khối 10, Khối 11, Khối 12"
                 />
-                
-                <InputField
-                    label="Mô tả (tùy chọn)"
-                    name="description"
-                    defaultValue={data?.description}
-                    register={register}
-                    error={errors?.description}
-                    className="w-full md:w-1/2"
-                />
-                
-                {data?.id && (
-                    <InputField
-                        label="Id khối"
-                        name="id"
-                        defaultValue={data?.id}
-                        register={register}
-                        error={errors?.id}
-                        disabled={true}
-                        className="w-full md:w-1/3"
-                    />
-                )}
             </div>
 
             {error && (
@@ -165,15 +108,19 @@ const GradeForm = ({
                 </div>
             )}
 
-            <button 
-                className="bg-blue-400 text-white p-2 rounded-md"
+            <button
+                className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300"
                 disabled={isSubmitting}
                 type="submit"
             >
-                {isSubmitting ? "Đang xử lý..." : (type === "create" ? "Thêm mới" : "Cập nhật")}
+                {isSubmitting
+                    ? "Đang xử lý..."
+                    : type === "create"
+                    ? "Thêm mới"
+                    : "Cập nhật"}
             </button>
         </form>
     );
 };
 
-export default GradeForm; 
+export default GradeForm;
