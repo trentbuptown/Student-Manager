@@ -14,6 +14,9 @@ const StudentForm = dynamic(() => import("./forms/StudentForm"), {
 const ClassForm = dynamic(() => import("./forms/ClassForm"), {
     loading: () => <p>Loading...</p>,
 });
+const GradeForm = dynamic(() => import("./forms/GradeForm"), {
+    loading: () => <p>Loading...</p>,
+});
 const SubjectForm = dynamic(() => import("./forms/SubjectForm"), {
     loading: () => <p>Loading...</p>,
 });
@@ -22,11 +25,12 @@ const ReportForm = dynamic(() => import("./forms/ReportForm"), {
 });
 
 const forms: {
-    [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+    [key: string]: (type: "create" | "update", data?: any, onSuccess?: () => void) => JSX.Element;
 } = {
-    teacher: (type, data) => <TeacherForm type={type} data={data} />,
+    teacher: (type, data, onSuccess) => <TeacherForm type={type} data={data} onSuccess={onSuccess} />,
     student: (type, data) => <StudentForm type={type} data={data} />,
     class: (type, data) => <ClassForm type={type} data={data} />,
+    grade: (type, data) => <GradeForm type={type} data={data} />,
     subject: (type, data) => <SubjectForm type={type} data={data} />,
     report: (type, data) => <ReportForm type={type} data={data} />,
 };
@@ -36,10 +40,12 @@ const FormModal = ({
     type,
     data,
     id,
+    onSuccess,
 }: {
     table:
         | "student"
         | "class"
+        | "grade"
         | "subject"
         | "teacher"
         | "attendance"
@@ -55,6 +61,7 @@ const FormModal = ({
     type: "create" | "update" | "delete";
     data?: any;
     id?: number;
+    onSuccess?: () => void;
 }) => {
     const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
     const bgColor =
@@ -65,6 +72,13 @@ const FormModal = ({
             : "bg-[var(--purple-pastel)]";
 
     const [open, setOpen] = useState(false);
+
+    const handleSuccess = () => {
+        setOpen(false);
+        if (onSuccess) {
+            onSuccess();
+        }
+    };
 
     const Form = () => {
         return type === "delete" && id ? (
@@ -80,16 +94,24 @@ const FormModal = ({
                     Dữ liệu sẽ không thể được khôi phục.
                 </span>
                 <div className="flex gap-8 mt-8">
-                    <button className="bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300">
+                    <button 
+                        className="bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
+                        onClick={() => setOpen(false)}
+                        type="button"
+                    >
                         Hủy
                     </button>
-                    <button className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300">
+                    <button 
+                        className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
+                        onClick={handleSuccess}
+                        type="button"
+                    >
                         Xóa
                     </button>
                 </div>
             </form>
         ) : type === "create" || type === "update" ? (
-            forms[table](type, data)
+            forms[table](type, data, handleSuccess)
         ) : (
             "Form not found!"
         );

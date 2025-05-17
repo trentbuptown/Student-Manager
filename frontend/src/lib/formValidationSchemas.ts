@@ -31,8 +31,8 @@ export const teacherSchema = z.object({
         .min(8, { message: "Mật khẩu phải chứa ít nhất 8 ký tự. " })
         .optional()
         .or(z.literal("")),
-    name: z.string().min(1, { message: "Vui lòng nhập tên." }),
-    surname: z.string().min(1, { message: " Vui lòng nhập họ." }),
+    firstName: z.string().min(1, { message: "Vui lòng nhập tên." }),
+    lastName: z.string().min(1, { message: " Vui lòng nhập họ." }),
     email: z
         .string()
         .email({ message: "Email không hợp lệ." })
@@ -43,7 +43,7 @@ export const teacherSchema = z.object({
     img: z.string().optional(),
     birthday: z.coerce.date({ message: "Vui lòng nhập ngày sinh." }),
     sex: z.enum(["MALE", "FEMALE"], { message: "Vui lòng chọn giới tính." }),
-    subjects: z.array(z.string()).optional(), // subject ids
+    subjects: z.array(z.coerce.number()).optional(), // subject ids
 });
 
 export type TeacherSchema = z.infer<typeof teacherSchema>;

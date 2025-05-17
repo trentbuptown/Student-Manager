@@ -4,12 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import Image from "next/image";
-import { CldUploadWidget } from "next-cloudinary";
+import dynamic from "next/dynamic";
 import { studentSchema, StudentSchema } from "@/lib/formValidationSchemas";
 import { classesData } from "@/lib/data";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+
+// Tải động CldUploadWidget để tránh lỗi khi không có cấu hình
+const CldUploadWidget = dynamic(
+  () => import('next-cloudinary').then((mod) => mod.CldUploadWidget),
+  { 
+    ssr: false,
+    loading: () => <p>Đang tải...</p>
+  }
+);
 
 type Class = {
     id: number;
@@ -31,6 +40,23 @@ const StudentForm = ({
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [cloudinaryAvailable, setCloudinaryAvailable] = useState(false);
+
+    // Kiểm tra xem Cloudinary có được cấu hình không
+    useEffect(() => {
+        try {
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+            if (cloudName && cloudName !== 'your_cloud_name') {
+                setCloudinaryAvailable(true);
+            } else {
+                setCloudinaryAvailable(false);
+                console.warn('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME không được cấu hình hoặc chưa được thay đổi khỏi giá trị mặc định');
+            }
+        } catch (error) {
+            setCloudinaryAvailable(false);
+            console.error('Lỗi khi kiểm tra cấu hình Cloudinary:', error);
+        }
+    }, []);
 
     // Save the uploaded image info
     const [imgInfo, setImgInfo] = useState<any>(data?.imgInfo || null);
@@ -43,9 +69,26 @@ const StudentForm = ({
         watch,
     } = useForm({
         resolver: zodResolver(studentSchema),
+        defaultValues: data || {}
     });
 
     const imgValue = watch("img");
+
+    // Xử lý tải ảnh lên bằng input file thông thường
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Giả lập URL ảnh từ file
+        const imageUrl = URL.createObjectURL(file);
+        setValue("img", imageUrl);
+        setImgInfo({ 
+            original_filename: file.name,
+            secure_url: imageUrl
+        });
+        
+        toast.success("Tải ảnh thành công (chế độ giả lập)");
+    };
 
     const onSubmit = handleSubmit(async (formData) => {
         try {
@@ -199,14 +242,10 @@ const StudentForm = ({
                 <InputField
                     label="Ngày sinh"
                     name="birthday"
-                    defaultValue={
-                        data?.birthday
-                            ? data.birthday.toISOString().split("T")[0]
-                            : ""
-                    }
+                    type="date"
+                    defaultValue={data?.birthday}
                     register={register}
                     error={errors.birthday}
-                    type="date"
                 />
                 <InputField
                     label="Tên phụ huynh"
@@ -221,10 +260,10 @@ const StudentForm = ({
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                         {...register("sex")}
-                        defaultValue={data?.sex}
+                        defaultValue={data?.sex || "MALE"}
                     >
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
+                        <option value="MALE">Nam</option>
+                        <option value="FEMALE">Nữ</option>
                     </select>
                     {errors.sex?.message && (
                         <p className="text-xs text-red-400">
@@ -232,90 +271,89 @@ const StudentForm = ({
                         </p>
                     )}
                 </div>
+            </div>
+            <span className="text-xs text-gray-400 font-medium">
+                Ảnh đại diện
+            </span>
+            <div className="flex flex-col gap-4">
+                {/* Hiển thị ảnh đã tải lên */}
+                {imgValue && (
+                    <div className="flex flex-col items-center gap-2">
+                        <Image
+                            src={imgValue}
+                            alt="Avatar"
+                            width={100}
+                            height={100}
+                            className="rounded-full object-cover w-[100px] h-[100px]"
+                            onError={() => {
+                                setValue("img", "");
+                                setImgInfo(null);
+                            }}
+                        />
+                        <p className="text-xs text-gray-500">
+                            {imgInfo?.original_filename || "Ảnh đại diện"}
+                        </p>
+                    </div>
+                )}
 
-                {/* Image Upload Section */}
-                <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center mt-2">
-                    <label className="text-xs text-gray-500 block mb-2">
-                        Ảnh cá nhân
-                    </label>
-                    <div className="flex items-center gap-4">
-                        {/* Show image preview if available */}
-                        {imgValue && (
-                            <div className="h-20 w-20 relative rounded-md overflow-hidden">
-                                <Image
-                                    src={imgValue}
-                                    alt="Ảnh đại diện"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        )}
-
+                {/* Tùy chọn tải lên */}
+                <div className="flex flex-col gap-2">
+                    {cloudinaryAvailable ? (
                         <CldUploadWidget
-                            uploadPreset="school"
-                            onSuccess={(result: any, { widget }) => {
-                                // Update the form with the image URL
-                                const info = result.info;
-                                setImgInfo(info);
-                                setValue("img", info.secure_url);
-                                widget.close();
-
-                                // Show success message
-                                toast.success("Tải ảnh thành công");
+                            uploadPreset="student_manager"
+                            options={{
+                                maxFiles: 1,
+                                resourceType: "image",
+                                folder: "student_manager/avatars",
+                            }}
+                            onSuccess={(result: any) => {
+                                if (result.info) {
+                                    setValue("img", result.info.secure_url);
+                                    setImgInfo(result.info);
+                                    toast.success("Tải ảnh thành công");
+                                }
                             }}
                         >
-                            {({ open }) => {
-                                return (
-                                    <div
-                                        className="flex items-center gap-2 cursor-pointer p-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                                        onClick={() => open()}
-                                    >
-                                        <Image
-                                            src="/upload.png"
-                                            alt=""
-                                            width={24}
-                                            height={24}
-                                        />
-                                        <span className="text-sm">
-                                            {imgValue
-                                                ? "Đổi ảnh đại diện"
-                                                : "Tải ảnh đại diện"}
-                                        </span>
-                                    </div>
-                                );
-                            }}
+                            {({ open }) => (
+                                <button
+                                    type="button"
+                                    onClick={() => open()}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition w-fit"
+                                >
+                                    Tải ảnh lên
+                                </button>
+                            )}
                         </CldUploadWidget>
-
-                        {/* Add option to remove the image */}
-                        {imgValue && (
-                            <button
-                                type="button"
-                                className="text-sm text-red-500 hover:text-red-700"
-                                onClick={() => {
-                                    setValue("img", "");
-                                    setImgInfo(null);
-                                }}
-                            >
-                                Remove
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Hidden input field to store the image URL */}
-                    <input type="hidden" {...register("img")} />
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            <p className="text-sm text-amber-600">
+                                Chế độ giả lập: Cloudinary chưa được cấu hình
+                            </p>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
-
-            {error && <span className="text-red-500">{error}</span>}
-
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <button
-                className="bg-blue-400 text-white p-2 rounded-md hover:bg-blue-500 transition-colors disabled:bg-gray-300"
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition w-fit self-end"
                 disabled={isSubmitting}
             >
                 {isSubmitting
-                    ? "Processing..."
+                    ? "Đang xử lý..."
                     : type === "create"
-                    ? "Thêm mới"
+                    ? "Thêm học sinh"
                     : "Cập nhật"}
             </button>
         </form>

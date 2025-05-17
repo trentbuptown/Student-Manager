@@ -15,7 +15,7 @@ import {
 interface MenuItem {
     name: string;
     path: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
 }
 
 const menuItems: MenuItem[] = [
@@ -102,8 +102,7 @@ const Sidebar = () => {
 
                     {/* Logout link */}
                     <Link
-                        href="/sign-in"
-                        onClick={() => localStorage.removeItem('token')}
+                        href="/logout"
                         className="flex items-center space-x-3 px-4 py-3 m-4 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                     >
                         <FaSignOutAlt className="w-5 h-5" />

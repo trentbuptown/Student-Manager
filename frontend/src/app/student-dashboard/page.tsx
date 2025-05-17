@@ -97,11 +97,7 @@ export default function StudentDashboard() {
           
           <div className="mt-8 pt-4 border-t">
             <Link
-              href="/sign-in"
-              onClick={() => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-              }}
+              href="/logout"
               className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
             >
               <FaLock className="w-5 h-5" />

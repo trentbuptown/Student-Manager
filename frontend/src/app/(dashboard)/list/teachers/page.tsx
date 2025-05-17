@@ -1,22 +1,15 @@
+"use client";
+
 import Pagination from "@/components/Pagination";
 import TableSearch from "@/components/TableSearch";
 import Table from "@/components/Table";
 import Image from "next/image";
 import Link from "next/link";
-import { role, teachersData } from "@/lib/data";
+import { role } from "@/lib/data";
 import FormModal from "@/components/FormModal";
-
-type Teacher = {
-    id: number;
-    teacherId: string;
-    name: string;
-    email?: string;
-    photo: string;
-    subjects: string[];
-    classes: string[];
-    phone: string;
-    address: string;
-};
+import { useEffect, useState } from "react";
+import { Teacher, getAllTeachers, deleteTeacher } from "@/services/teacherService";
+import { toast } from "react-toastify";
 
 const columns = [
     {
@@ -24,18 +17,18 @@ const columns = [
         accessor: "Info",
     },
     {
-        header: "Mã giáo viên",
-        accessor: "teacherId",
+        header: "Chuyên môn",
+        accessor: "specialization",
         className: "hidden md:table-cell",
     },
     {
-        header: "Môn học",
-        accessor: "subjects",
+        header: "Chủ nhiệm",
+        accessor: "is_gvcn",
         className: "hidden md:table-cell",
     },
     {
-        header: "Dạy lớp",
-        accessor: "classes",
+        header: "Email",
+        accessor: "email",
         className: "hidden md:table-cell",
     },
     {
@@ -53,7 +46,69 @@ const columns = [
         accessor: "actions",
     },
 ];
+
 const TeacherListPage = () => {
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    
+    // Lấy danh sách giáo viên khi component mount
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            try {
+                setLoading(true);
+                const data = await getAllTeachers();
+                setTeachers(data);
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách giáo viên:", error);
+                toast.error("Không thể tải danh sách giáo viên");
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchTeachers();
+    }, []);
+    
+    // Xử lý xóa giáo viên
+    const handleDeleteTeacher = async (id: number) => {
+        try {
+            const result = await deleteTeacher(id);
+            if (result.success) {
+                // Cập nhật danh sách giáo viên sau khi xóa
+                setTeachers(teachers.filter(teacher => teacher.id !== id));
+                toast.success(result.message || "Xóa giáo viên thành công");
+            } else {
+                toast.error(result.message || "Không thể xóa giáo viên");
+            }
+        } catch (error) {
+            console.error("Lỗi khi xóa giáo viên:", error);
+            toast.error("Đã xảy ra lỗi khi xóa giáo viên");
+        }
+    };
+    
+    // Lọc giáo viên theo từ khóa tìm kiếm
+    const filteredTeachers = teachers.filter(teacher => 
+        teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        teacher.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        teacher.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (teacher.user?.phone && teacher.user.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    
+    // Phân trang
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredTeachers.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+    
+    // Xử lý tìm kiếm
+    const handleSearch = (term: string) => {
+        setSearchTerm(term);
+        setCurrentPage(1); // Reset về trang đầu tiên khi tìm kiếm
+    };
+
     const renderRow = (item: Teacher) => (
         <tr
             key={item.id}
@@ -61,7 +116,7 @@ const TeacherListPage = () => {
         >
             <td className="flex items-center gap-4 p-4">
                 <Image
-                    src={item.photo}
+                    src={item.user?.profile_photo || "https://via.placeholder.com/40"}
                     alt=""
                     width={40}
                     height={40}
@@ -69,14 +124,14 @@ const TeacherListPage = () => {
                 />
                 <div className="flex flex-col">
                     <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-xs text-gray-500">{item.email}</p>
+                    <p className="text-xs text-gray-500">{item.user?.email}</p>
                 </div>
             </td>
-            <td className="hidden md:table-cell">{item.teacherId}</td>
-            <td className="hidden md:table-cell">{item.subjects.join(", ")}</td>
-            <td className="hidden md:table-cell">{item.classes.join(", ")}</td>
-            <td className="hidden md:table-cell">{item.phone}</td>
-            <td className="hidden md:table-cell">{item.address}</td>
+            <td className="hidden md:table-cell">{item.specialization || "-"}</td>
+            <td className="hidden md:table-cell">{item.is_gvcn ? "Có" : "Không"}</td>
+            <td className="hidden md:table-cell">{item.user?.email || "-"}</td>
+            <td className="hidden md:table-cell">{item.user?.phone || "-"}</td>
+            <td className="hidden md:table-cell">{item.user?.address || "-"}</td>
             <td>
                 <div className="flex items-center gap-2">
                     {role === "admin" && (
@@ -85,12 +140,21 @@ const TeacherListPage = () => {
                                 table="teacher"
                                 type="update"
                                 data={item}
+                                onSuccess={() => {
+                                    // Refresh danh sách giáo viên sau khi cập nhật
+                                    getAllTeachers().then(data => setTeachers(data));
+                                }}
                             />
-                            <FormModal
-                                table="teacher"
-                                type="delete"
-                                id={item.id}
-                            />
+                            <button
+                                className="w-7 h-7 bg-[var(--purple-pastel)] flex items-center justify-center rounded-full cursor-pointer"
+                                onClick={() => {
+                                    if (window.confirm("Bạn có chắc chắn muốn xóa giáo viên này?")) {
+                                        handleDeleteTeacher(item.id);
+                                    }
+                                }}
+                            >
+                                <Image src="/delete.png" alt="" width={16} height={16} />
+                            </button>
                         </>
                     )}
                 </div>
@@ -106,7 +170,7 @@ const TeacherListPage = () => {
                     Danh sách giáo viên
                 </h1>
                 <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-                    <TableSearch />
+                    <TableSearch onSearch={handleSearch} />
                     <div className="flex gap-4 items-center self-end">
                         <button className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--yellow-pastel)] ">
                             <Image
@@ -125,28 +189,41 @@ const TeacherListPage = () => {
                             />
                         </button>
                         {role === "admin" && (
-                            <FormModal table="teacher" type="create" />
-                        )}
-                        {/* <button className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--yellow-pastel)] ">
-                            <Image
-                                src="/create.png"
-                                alt=""
-                                width={14}
-                                height={14}
+                            <FormModal 
+                                table="teacher" 
+                                type="create" 
+                                onSuccess={() => {
+                                    // Refresh danh sách giáo viên sau khi thêm mới
+                                    getAllTeachers().then(data => setTeachers(data));
+                                }}
                             />
-                        </button> */}
+                        )}
                     </div>
                 </div>
             </div>
-            <Table
-                columns={columns}
-                renderRow={renderRow}
-                data={teachersData}
-            />
-
-            <Pagination />
+            
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <p>Đang tải dữ liệu...</p>
+                </div>
+            ) : (
+                <>
+                    <Table
+                        columns={columns}
+                        renderRow={renderRow}
+                        data={currentItems}
+                    />
+                    
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                </>
+            )}
         </div>
     );
 };
 
 export default TeacherListPage;
+

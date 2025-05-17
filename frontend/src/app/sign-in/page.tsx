@@ -31,17 +31,31 @@ const LoginPage = () => {
             // Kiểm tra validation
             if (!formData.email || !formData.password) {
                 setError("Vui lòng nhập đầy đủ thông tin đăng nhập");
+                setIsLoading(false);
                 return;
             }
 
             const response = await login(formData);
             
-            // Lưu token vào localStorage
+            // Lưu token và thông tin user vào localStorage
             localStorage.setItem("token", response.token);
+            localStorage.setItem("user", JSON.stringify(response.user));
             
-            // Chuyển hướng sau khi đăng nhập thành công
-            router.push("/dashboard");
+            // Lưu token vào cookie để middleware có thể đọc được
+            // Thiết lập cookie với thời hạn 7 ngày, đảm bảo cookie được gửi trong mọi request
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 7);
+            document.cookie = `auth_token=${response.token}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+            
+            console.log("Đăng nhập thành công, chuyển hướng đến /dashboard");
+            
+            // Thêm một khoảng thời gian ngắn để đảm bảo cookie được lưu trước khi chuyển trang
+            setTimeout(() => {
+                // Chuyển hướng đến trang dashboard
+                router.push("/dashboard");
+            }, 100);
         } catch (err: any) {
+            console.error("Lỗi đăng nhập:", err);
             setError(err.response?.data?.message || "Có lỗi xảy ra khi đăng nhập");
         } finally {
             setIsLoading(false);

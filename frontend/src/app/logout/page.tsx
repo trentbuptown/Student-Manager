@@ -2,18 +2,25 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { logout } from '@/services/auth.service';
 
 export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Xóa token
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-    }
+    const handleLogout = async () => {
+      try {
+        // Gọi API logout - hàm này đã được cập nhật để xử lý lỗi
+        await logout();
+      } catch (error) {
+        console.error('Lỗi khi đăng xuất:', error);
+      } finally {
+        // Luôn chuyển hướng về trang đăng nhập, ngay cả khi có lỗi
+        router.push('/sign-in');
+      }
+    };
     
-    // Chuyển hướng đến trang đăng nhập
-    router.push('/sign-in');
+    handleLogout();
   }, [router]);
 
   return (

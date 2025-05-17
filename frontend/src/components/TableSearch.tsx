@@ -1,14 +1,29 @@
+"use client";
+
 import Image from "next/image";
-const TableSearch = () => {
+import { useState } from "react";
+
+const TableSearch = ({ onSearch }: { onSearch: (term: string) => void }) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSearch(searchTerm);
+    };
+    
     return (
-        <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2 w-full md:w-auto ">
-            <Image src="/search.png" alt="" width={14} height={14} />
-            <input
-                type="text"
-                placeholder="Search..."
-                className="w-[200px] p-2 bg-transparent outline-none"
-            />
-        </div>
+        <form className="flex items-center" onSubmit={handleSearch}>
+            <div className="flex items-center gap-2 border border-gray-300 rounded-md p-2">
+                <Image src="/search.png" alt="" width={14} height={14} />
+                <input
+                    type="text"
+                    className="text-sm outline-none w-full"
+                    placeholder="Tìm kiếm..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+        </form>
     );
 };
 
