@@ -1,0 +1,1954 @@
+(globalThis.TURBOPACK = globalThis.TURBOPACK || []).push(["static/chunks/src_94cc15bf._.js", {
+
+"[project]/src/lib/data.ts [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+// TEMPORARY DATA
+__turbopack_context__.s({
+    "announcementsData": (()=>announcementsData),
+    "assignmentsData": (()=>assignmentsData),
+    "calendarEvents": (()=>calendarEvents),
+    "classesData": (()=>classesData),
+    "eventsData": (()=>eventsData),
+    "examsData": (()=>examsData),
+    "lessonsData": (()=>lessonsData),
+    "parentsData": (()=>parentsData),
+    "resultsData": (()=>resultsData),
+    "role": (()=>role),
+    "studentsData": (()=>studentsData),
+    "subjectsData": (()=>subjectsData),
+    "teachersData": (()=>teachersData)
+});
+let role = "admin";
+const teachersData = [
+    {
+        id: 1,
+        teacherId: "0987654321",
+        name: "John Doe",
+        email: "john@doe.com",
+        photo: "https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Math",
+            "Geometry"
+        ],
+        classes: [
+            "1B",
+            "2A",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 2,
+        teacherId: "0987654321",
+        name: "Jane Doe",
+        email: "jane@doe.com",
+        photo: "https://images.pexels.com/photos/936126/pexels-photo-936126.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Physics",
+            "Chemistry"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 3,
+        teacherId: "0987654321",
+        name: "Mike Geller",
+        email: "mike@geller.com",
+        photo: "https://images.pexels.com/photos/428328/pexels-photo-428328.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Biology"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 4,
+        teacherId: "0987654321",
+        name: "Jay French",
+        email: "jay@gmail.com",
+        photo: "https://images.pexels.com/photos/1187765/pexels-photo-1187765.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "History"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 5,
+        teacherId: "0987654321",
+        name: "Jane Smith",
+        email: "jane@gmail.com",
+        photo: "https://images.pexels.com/photos/1102341/pexels-photo-1102341.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Music",
+            "History"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 6,
+        teacherId: "0987654321",
+        name: "Anna Santiago",
+        email: "anna@gmail.com",
+        photo: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Physics"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 7,
+        teacherId: "0987654321",
+        name: "Allen Black",
+        email: "allen@black.com",
+        photo: "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "English",
+            "Spanish"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 8,
+        teacherId: "0987654321",
+        name: "Ophelia Castro",
+        email: "ophelia@castro.com",
+        photo: "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Math",
+            "Geometry"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 9,
+        teacherId: "0987654321",
+        name: "Derek Briggs",
+        email: "derek@briggs.com",
+        photo: "https://images.pexels.com/photos/842980/pexels-photo-842980.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Literature",
+            "English"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 10,
+        teacherId: "0987654321",
+        name: "John Glover",
+        email: "john@glover.com",
+        photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        subjects: [
+            "Biology"
+        ],
+        classes: [
+            "5A",
+            "4B",
+            "3C"
+        ],
+        address: "123 Main St, Anytown, USA"
+    }
+];
+const studentsData = [
+    {
+        id: 1,
+        studentId: "0987654321",
+        name: "John Doe",
+        email: "john@doe.com",
+        photo: "https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "1B",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 2,
+        studentId: "0987654321",
+        name: "Jane Doe",
+        email: "jane@doe.com",
+        photo: "https://images.pexels.com/photos/936126/pexels-photo-936126.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 3,
+        studentId: "0987654321",
+        name: "Mike Geller",
+        email: "mike@geller.com",
+        photo: "https://images.pexels.com/photos/428328/pexels-photo-428328.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 4,
+        studentId: "0987654321",
+        name: "Jay French",
+        email: "jay@gmail.com",
+        photo: "https://images.pexels.com/photos/1187765/pexels-photo-1187765.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 5,
+        studentId: "0987654321",
+        name: "Jane Smith",
+        email: "jane@gmail.com",
+        photo: "https://images.pexels.com/photos/1102341/pexels-photo-1102341.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 6,
+        studentId: "0987654321",
+        name: "Anna Santiago",
+        email: "anna@gmail.com",
+        photo: "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 7,
+        studentId: "0987654321",
+        name: "Allen Black",
+        email: "allen@black.com",
+        photo: "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 8,
+        studentId: "0987654321",
+        name: "Ophelia Castro",
+        email: "ophelia@castro.com",
+        photo: "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 9,
+        studentId: "0987654321",
+        name: "Derek Briggs",
+        email: "derek@briggs.com",
+        photo: "https://images.pexels.com/photos/842980/pexels-photo-842980.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 10,
+        studentId: "0987654321",
+        name: "John Glover",
+        email: "john@glover.com",
+        photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        phone: "0987654321",
+        grade: 5,
+        class: "5A",
+        address: "123 Main St, Anytown, USA"
+    }
+];
+const parentsData = [
+    {
+        id: 1,
+        name: "John Doe",
+        students: [
+            "Sarah Brewer"
+        ],
+        email: "john@doe.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 2,
+        name: "Jane Doe",
+        students: [
+            "Cecilia Bradley"
+        ],
+        email: "jane@doe.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 3,
+        name: "Mike Geller",
+        students: [
+            "Fanny Caldwell"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 4,
+        name: "Jay French",
+        students: [
+            "Mollie Fitzgerald",
+            "Ian Bryant"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 5,
+        name: "Jane Smith",
+        students: [
+            "Mable Harvey"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 6,
+        name: "Anna Santiago",
+        students: [
+            "Joel Lambert"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 7,
+        name: "Allen Black",
+        students: [
+            "Carrie Tucker",
+            "Lilly Underwood"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 8,
+        name: "Ophelia Castro",
+        students: [
+            "Alexander Blair"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 9,
+        name: "Derek Briggs",
+        students: [
+            "Susan Webster",
+            "Maude Stone"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    },
+    {
+        id: 10,
+        name: "John Glover",
+        students: [
+            "Stella Scott"
+        ],
+        email: "mike@geller.com",
+        phone: "0987654321",
+        address: "123 Main St, Anytown, USA"
+    }
+];
+const subjectsData = [
+    {
+        id: 1,
+        subjectId: "840000",
+        name: "Math",
+        teachers: [
+            "Alice Phelps",
+            "Russell Davidson"
+        ]
+    },
+    {
+        id: 2,
+        subjectId: "840000",
+        name: "English",
+        teachers: [
+            "Manuel Becker",
+            "Eddie Chavez"
+        ]
+    },
+    {
+        id: 3,
+        subjectId: "840000",
+        name: "Physics",
+        teachers: [
+            "Lola Newman",
+            "Darrell Delgado"
+        ]
+    },
+    {
+        id: 4,
+        subjectId: "840000",
+        name: "Chemistry",
+        teachers: [
+            "Nathan Kelly",
+            "Benjamin Snyder"
+        ]
+    },
+    {
+        id: 5,
+        subjectId: "840000",
+        name: "Biology",
+        teachers: [
+            "Alma Benson",
+            "Lina Collier"
+        ]
+    },
+    {
+        id: 6,
+        subjectId: "840000",
+        name: "History",
+        teachers: [
+            "Hannah Bowman",
+            "Betty Obrien"
+        ]
+    },
+    {
+        id: 7,
+        subjectId: "840000",
+        name: "Geography",
+        teachers: [
+            "Lora French",
+            "Sue Brady"
+        ]
+    },
+    {
+        id: 8,
+        subjectId: "840000",
+        name: "Art",
+        teachers: [
+            "Harriet Alvarado",
+            "Mayme Keller"
+        ]
+    },
+    {
+        id: 9,
+        subjectId: "840000",
+        name: "Music",
+        teachers: [
+            "Gertrude Roy",
+            "Rosa Singleton"
+        ]
+    },
+    {
+        id: 10,
+        subjectId: "840000",
+        name: "Literature",
+        teachers: [
+            "Effie Lynch",
+            "Brett Flowers"
+        ]
+    }
+];
+const classesData = [
+    {
+        id: 1,
+        name: "1A",
+        capacity: 40,
+        grade: 1,
+        supervisor: "Joseph Padilla"
+    },
+    {
+        id: 2,
+        name: "2B",
+        capacity: 45,
+        grade: 2,
+        supervisor: "Blake Joseph"
+    },
+    {
+        id: 3,
+        name: "3C",
+        capacity: 42,
+        grade: 3,
+        supervisor: "Tom Bennett"
+    },
+    {
+        id: 4,
+        name: "4B",
+        capacity: 40,
+        grade: 4,
+        supervisor: "Aaron Collins"
+    },
+    {
+        id: 5,
+        name: "5A",
+        capacity: 38,
+        grade: 5,
+        supervisor: "Iva Frank"
+    },
+    {
+        id: 5,
+        name: "5B",
+        capacity: 40,
+        grade: 5,
+        supervisor: "Leila Santos"
+    },
+    {
+        id: 7,
+        name: "7A",
+        capacity: 42,
+        grade: 7,
+        supervisor: "Carrie Walton"
+    },
+    {
+        id: 8,
+        name: "6B",
+        capacity: 40,
+        grade: 6,
+        supervisor: "Christopher Butler"
+    },
+    {
+        id: 9,
+        name: "6C",
+        capacity: 45,
+        grade: 6,
+        supervisor: "Marc Miller"
+    },
+    {
+        id: 10,
+        name: "6D",
+        capacity: 42,
+        grade: 6,
+        supervisor: "Ophelia Marsh"
+    }
+];
+const lessonsData = [
+    {
+        id: 1,
+        subject: "Math",
+        class: "1A",
+        teacher: "Tommy Wise"
+    },
+    {
+        id: 2,
+        subject: "English",
+        class: "2A",
+        teacher: "Rhoda Frank"
+    },
+    {
+        id: 3,
+        subject: "Science",
+        class: "3A",
+        teacher: "Della Dunn"
+    },
+    {
+        id: 4,
+        subject: "Social Studies",
+        class: "1B",
+        teacher: "Bruce Rodriguez"
+    },
+    {
+        id: 5,
+        subject: "Art",
+        class: "4A",
+        teacher: "Birdie Butler"
+    },
+    {
+        id: 6,
+        subject: "Music",
+        class: "5A",
+        teacher: "Bettie Oliver"
+    },
+    {
+        id: 7,
+        subject: "History",
+        class: "6A",
+        teacher: "Herman Howard"
+    },
+    {
+        id: 8,
+        subject: "Geography",
+        class: "6B",
+        teacher: "Lucinda Thomas"
+    },
+    {
+        id: 9,
+        subject: "Physics",
+        class: "6C",
+        teacher: "Ronald Roberts"
+    },
+    {
+        id: 10,
+        subject: "Chemistry",
+        class: "4B",
+        teacher: "Julia Pittman"
+    }
+];
+const examsData = [
+    {
+        id: 1,
+        subject: "Math",
+        class: "1A",
+        teacher: "Martha Morris",
+        date: "2025-04-12"
+    },
+    {
+        id: 2,
+        subject: "English",
+        class: "2A",
+        teacher: "Randall Garcia",
+        date: "2025-04-12"
+    },
+    {
+        id: 3,
+        subject: "Science",
+        class: "3A",
+        teacher: "Myrtie Scott",
+        date: "2025-04-12"
+    },
+    {
+        id: 4,
+        subject: "Social Studies",
+        class: "1B",
+        teacher: "Alvin Swanson",
+        date: "2025-04-12"
+    },
+    {
+        id: 5,
+        subject: "Art",
+        class: "4A",
+        teacher: "Mabelle Wallace",
+        date: "2025-04-12"
+    },
+    {
+        id: 6,
+        subject: "Music",
+        class: "5A",
+        teacher: "Dale Thompson",
+        date: "2025-04-12"
+    },
+    {
+        id: 7,
+        subject: "History",
+        class: "6A",
+        teacher: "Allie Conner",
+        date: "2025-04-12"
+    },
+    {
+        id: 8,
+        subject: "Geography",
+        class: "6B",
+        teacher: "Hunter Fuller",
+        date: "2025-04-12"
+    },
+    {
+        id: 9,
+        subject: "Physics",
+        class: "7A",
+        teacher: "Lois Lindsey",
+        date: "2025-04-12"
+    },
+    {
+        id: 10,
+        subject: "Chemistry",
+        class: "8A",
+        teacher: "Vera Soto",
+        date: "2025-04-12"
+    }
+];
+const assignmentsData = [
+    {
+        id: 1,
+        subject: "Math",
+        class: "1A",
+        teacher: "Anthony Boone",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 2,
+        subject: "English",
+        class: "2A",
+        teacher: "Clifford Bowen",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 3,
+        subject: "Science",
+        class: "3A",
+        teacher: "Catherine Malone",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 4,
+        subject: "Social Studies",
+        class: "1B",
+        teacher: "Willie Medina",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 5,
+        subject: "Art",
+        class: "4A",
+        teacher: "Jose Ruiz",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 6,
+        subject: "Music",
+        class: "5A",
+        teacher: "Katharine Owens",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 7,
+        subject: "History",
+        class: "6A",
+        teacher: "Shawn Norman",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 8,
+        subject: "Geography",
+        class: "6B",
+        teacher: "Don Holloway",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 9,
+        subject: "Physics",
+        class: "7A",
+        teacher: "Franklin Gregory",
+        dueDate: "2025-04-12"
+    },
+    {
+        id: 10,
+        subject: "Chemistry",
+        class: "8A",
+        teacher: "Danny Nguyen",
+        dueDate: "2025-04-12"
+    }
+];
+const resultsData = [
+    {
+        id: 1,
+        subject: "Math",
+        class: "1A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 2,
+        subject: "English",
+        class: "2A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 3,
+        subject: "Science",
+        class: "3A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 4,
+        subject: "Social Studies",
+        class: "1B",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 5,
+        subject: "Art",
+        class: "4A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 6,
+        subject: "Music",
+        class: "5A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 7,
+        subject: "History",
+        class: "6A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 8,
+        subject: "Geography",
+        class: "6B",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 9,
+        subject: "Physics",
+        class: "7A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    },
+    {
+        id: 10,
+        subject: "Chemistry",
+        class: "8A",
+        teacher: "John Doe",
+        student: "John Doe",
+        date: "2025-04-12",
+        type: "exam",
+        score: 90
+    }
+];
+const eventsData = [
+    {
+        id: 1,
+        title: "Lake Trip",
+        class: "1A",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 2,
+        title: "Picnic",
+        class: "2A",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 3,
+        title: "Beach Trip",
+        class: "3A",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 4,
+        title: "Museum Trip",
+        class: "4A",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 5,
+        title: "Music Concert",
+        class: "5A",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 6,
+        title: "Magician Show",
+        class: "1B",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 7,
+        title: "Lake Trip",
+        class: "2B",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 8,
+        title: "Cycling Race",
+        class: "3B",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 9,
+        title: "Art Exhibition",
+        class: "4B",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    },
+    {
+        id: 10,
+        title: "Sports Tournament",
+        class: "5B",
+        date: "2025-04-12",
+        startTime: "10:00",
+        endTime: "11:00"
+    }
+];
+const announcementsData = [
+    {
+        id: 1,
+        title: "About 4A Math Test",
+        class: "4A",
+        date: "2025-04-12"
+    },
+    {
+        id: 2,
+        title: "About 3A Math Test",
+        class: "3A",
+        date: "2025-04-12"
+    },
+    {
+        id: 3,
+        title: "About 3B Math Test",
+        class: "3B",
+        date: "2025-04-12"
+    },
+    {
+        id: 4,
+        title: "About 6A Math Test",
+        class: "6A",
+        date: "2025-04-12"
+    },
+    {
+        id: 5,
+        title: "About 8C Math Test",
+        class: "8C",
+        date: "2025-04-12"
+    },
+    {
+        id: 6,
+        title: "About 2A Math Test",
+        class: "2A",
+        date: "2025-04-12"
+    },
+    {
+        id: 7,
+        title: "About 4C Math Test",
+        class: "4C",
+        date: "2025-04-12"
+    },
+    {
+        id: 8,
+        title: "About 4B Math Test",
+        class: "4B",
+        date: "2025-04-12"
+    },
+    {
+        id: 9,
+        title: "About 3C Math Test",
+        class: "3C",
+        date: "2025-04-12"
+    },
+    {
+        id: 10,
+        title: "About 1C Math Test",
+        class: "1C",
+        date: "2025-04-12"
+    }
+];
+const calendarEvents = [
+    {
+        title: "Math",
+        allDay: false,
+        start: new Date(2025, 3, 7, 8, 0),
+        end: new Date(2025, 3, 7, 8, 45)
+    },
+    {
+        title: "English",
+        allDay: false,
+        start: new Date(2025, 3, 7, 9, 0),
+        end: new Date(2025, 3, 7, 9, 45)
+    },
+    {
+        title: "Biology",
+        allDay: false,
+        start: new Date(2025, 3, 7, 10, 0),
+        end: new Date(2025, 3, 7, 10, 45)
+    },
+    {
+        title: "Physics",
+        allDay: false,
+        start: new Date(2025, 3, 7, 11, 0),
+        end: new Date(2025, 3, 7, 11, 45)
+    },
+    {
+        title: "Chemistry",
+        allDay: false,
+        start: new Date(2025, 3, 7, 13, 0),
+        end: new Date(2025, 3, 7, 13, 45)
+    },
+    {
+        title: "History",
+        allDay: false,
+        start: new Date(2025, 3, 7, 14, 0),
+        end: new Date(2025, 3, 7, 14, 45)
+    },
+    {
+        title: "English",
+        allDay: false,
+        start: new Date(2025, 3, 8, 9, 0),
+        end: new Date(2025, 3, 8, 9, 45)
+    },
+    {
+        title: "Biology",
+        allDay: false,
+        start: new Date(2025, 3, 8, 10, 0),
+        end: new Date(2025, 3, 8, 10, 45)
+    },
+    {
+        title: "Physics",
+        allDay: false,
+        start: new Date(2025, 3, 8, 11, 0),
+        end: new Date(2025, 3, 8, 11, 45)
+    },
+    {
+        title: "History",
+        allDay: false,
+        start: new Date(2025, 3, 8, 14, 0),
+        end: new Date(2025, 3, 8, 14, 45)
+    },
+    {
+        title: "Math",
+        allDay: false,
+        start: new Date(2025, 3, 9, 8, 0),
+        end: new Date(2025, 3, 9, 8, 45)
+    },
+    {
+        title: "Biology",
+        allDay: false,
+        start: new Date(2025, 3, 9, 10, 0),
+        end: new Date(2025, 3, 9, 10, 45)
+    },
+    {
+        title: "Chemistry",
+        allDay: false,
+        start: new Date(2025, 3, 9, 13, 0),
+        end: new Date(2025, 3, 9, 13, 45)
+    },
+    {
+        title: "History",
+        allDay: false,
+        start: new Date(2025, 3, 9, 14, 0),
+        end: new Date(2025, 3, 9, 14, 45)
+    },
+    {
+        title: "English",
+        allDay: false,
+        start: new Date(2025, 3, 15, 9, 0),
+        end: new Date(2025, 3, 15, 9, 45)
+    },
+    {
+        title: "Biology",
+        allDay: false,
+        start: new Date(2025, 3, 15, 10, 0),
+        end: new Date(2025, 3, 15, 10, 45)
+    },
+    {
+        title: "Physics",
+        allDay: false,
+        start: new Date(2025, 3, 15, 11, 0),
+        end: new Date(2025, 3, 15, 11, 45)
+    },
+    {
+        title: "History",
+        allDay: false,
+        start: new Date(2025, 3, 15, 14, 0),
+        end: new Date(2025, 3, 15, 14, 45)
+    },
+    {
+        title: "Math",
+        allDay: false,
+        start: new Date(2025, 3, 16, 8, 0),
+        end: new Date(2025, 3, 16, 8, 45)
+    },
+    {
+        title: "English",
+        allDay: false,
+        start: new Date(2025, 3, 16, 9, 0),
+        end: new Date(2025, 3, 16, 9, 45)
+    },
+    {
+        title: "Physics",
+        allDay: false,
+        start: new Date(2025, 3, 16, 11, 0),
+        end: new Date(2025, 3, 16, 11, 45)
+    },
+    {
+        title: "Chemistry",
+        allDay: false,
+        start: new Date(2025, 3, 11, 13, 0),
+        end: new Date(2025, 3, 11, 13, 45)
+    },
+    {
+        title: "History",
+        allDay: false,
+        start: new Date(2025, 3, 11, 14, 0),
+        end: new Date(2025, 3, 11, 14, 45)
+    }
+];
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+"[project]/src/components/BigCalendar.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "default": (()=>__TURBOPACK__default__export__)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$big$2d$calendar$2f$dist$2f$react$2d$big$2d$calendar$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-big-calendar/dist/react-big-calendar.esm.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$moment$2f$moment$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/moment/moment.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$data$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/data.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
+"use client";
+;
+;
+;
+;
+;
+const localizer = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$big$2d$calendar$2f$dist$2f$react$2d$big$2d$calendar$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["momentLocalizer"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$moment$2f$moment$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]);
+const BigCalendar = ()=>{
+    _s();
+    const [view, setView] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$big$2d$calendar$2f$dist$2f$react$2d$big$2d$calendar$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Views"].WORK_WEEK);
+    const handleOnViewChange = (selectedView)=>{
+        setView(selectedView);
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$big$2d$calendar$2f$dist$2f$react$2d$big$2d$calendar$2e$esm$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Calendar"], {
+        localizer: localizer,
+        events: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$data$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["calendarEvents"],
+        startAccessor: "start",
+        endAccessor: "end",
+        views: [
+            "work_week",
+            "day"
+        ],
+        view: view,
+        onView: handleOnViewChange,
+        style: {
+            height: "98%"
+        },
+        min: new Date(2025, 3, 13, 8, 0, 0),
+        max: new Date(2025, 3, 19, 17, 0, 0)
+    }, void 0, false, {
+        fileName: "[project]/src/components/BigCalendar.tsx",
+        lineNumber: 18,
+        columnNumber: 9
+    }, this);
+};
+_s(BigCalendar, "UOErMMWTse6pjdrrl3N6SHCYnxI=");
+_c = BigCalendar;
+const __TURBOPACK__default__export__ = BigCalendar;
+var _c;
+__turbopack_context__.k.register(_c, "BigCalendar");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+"[project]/src/components/Performance.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "default": (()=>__TURBOPACK__default__export__)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/chart/PieChart.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/polar/Pie.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/recharts/es6/component/ResponsiveContainer.js [app-client] (ecmascript)");
+"use client";
+;
+;
+;
+const data = [
+    {
+        name: "Group A",
+        value: 92,
+        fill: "#c6e7ff"
+    },
+    {
+        name: "Group B",
+        value: 8,
+        fill: "#fff9bf"
+    }
+];
+const Performance = ()=>{
+    return(// Performance Chart
+    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "bg-white p-4 rounded-md h-80 relative",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex items-center justify-between",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                        className: "text-xl font-semibold",
+                        children: "Đánh giá"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Performance.tsx",
+                        lineNumber: 16,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        src: "/moreDark.png",
+                        alt: "",
+                        width: 16,
+                        height: 16
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Performance.tsx",
+                        lineNumber: 17,
+                        columnNumber: 17
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Performance.tsx",
+                lineNumber: 15,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                width: "100%",
+                height: "100%",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$PieChart$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PieChart"], {
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$recharts$2f$es6$2f$polar$2f$Pie$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Pie"], {
+                        dataKey: "value",
+                        startAngle: 180,
+                        endAngle: 0,
+                        data: data,
+                        cx: "50%",
+                        cy: "50%",
+                        innerRadius: 70,
+                        fill: "#8884d8"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Performance.tsx",
+                        lineNumber: 21,
+                        columnNumber: 21
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/src/components/Performance.tsx",
+                    lineNumber: 20,
+                    columnNumber: 17
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/Performance.tsx",
+                lineNumber: 19,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-center absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                        className: "text-3xl font-bold",
+                        children: "9.2"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Performance.tsx",
+                        lineNumber: 34,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-xs text-gray-300",
+                        children: "/10 điểm"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/Performance.tsx",
+                        lineNumber: 35,
+                        columnNumber: 17
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/Performance.tsx",
+                lineNumber: 33,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                className: "text-center font-medium absolute bottom-16 left-0 right-0 m-auto ",
+                children: "Học kỳ 1 - Học kỳ 2"
+            }, void 0, false, {
+                fileName: "[project]/src/components/Performance.tsx",
+                lineNumber: 37,
+                columnNumber: 13
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/Performance.tsx",
+        lineNumber: 14,
+        columnNumber: 9
+    }, this));
+};
+_c = Performance;
+const __TURBOPACK__default__export__ = Performance;
+var _c;
+__turbopack_context__.k.register(_c, "Performance");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+"[project]/src/components/InputField.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "default": (()=>__TURBOPACK__default__export__)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+;
+const InputField = ({ label, type = "text", register, name, defaultValue, error, inputProps })=>{
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "flex flex-col gap-2 w-full md:w-1/4",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                className: "text-xs text-gray-500",
+                children: label
+            }, void 0, false, {
+                fileName: "[project]/src/components/InputField.tsx",
+                lineNumber: 24,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                type: type,
+                ...register(name),
+                className: "ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full",
+                ...inputProps,
+                defaultValue: defaultValue
+            }, void 0, false, {
+                fileName: "[project]/src/components/InputField.tsx",
+                lineNumber: 25,
+                columnNumber: 13
+            }, this),
+            error?.message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                className: "text-xs text-red-400",
+                children: error.message.toString()
+            }, void 0, false, {
+                fileName: "[project]/src/components/InputField.tsx",
+                lineNumber: 33,
+                columnNumber: 17
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/InputField.tsx",
+        lineNumber: 23,
+        columnNumber: 9
+    }, this);
+};
+_c = InputField;
+const __TURBOPACK__default__export__ = InputField;
+var _c;
+__turbopack_context__.k.register(_c, "InputField");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+"[project]/src/components/forms/TeacherForm.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "default": (()=>__TURBOPACK__default__export__)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$hookform$2f$resolvers$2f$zod$2f$dist$2f$zod$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@hookform/resolvers/zod/dist/zod.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$hook$2d$form$2f$dist$2f$index$2e$esm$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/react-hook-form/dist/index.esm.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/zod/lib/index.mjs [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/InputField.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
+"use client";
+;
+;
+;
+;
+;
+const schema = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].object({
+    username: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(3, {
+        message: "Tên người dùng phải chứa ít nhất 4 ký tự. "
+    }).max(20, {
+        message: "Tên người dùng không được vượt quá 20 ký tự."
+    }),
+    email: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().email({
+        message: "Email không hợp lệ."
+    }),
+    password: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(8, {
+        message: "Mật khẩu phải chứa ít nhất 8 ký tự. "
+    }),
+    firstName: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(1, {
+        message: "Vui lòng nhập tên. "
+    }),
+    lastName: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(1, {
+        message: "Vui lòng nhập họ."
+    }),
+    phone: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(1, {
+        message: "Vui lòng nhập số điện thoại. "
+    }),
+    address: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].string().min(1, {
+        message: "Vui lòng nhập địa chỉ. "
+    }),
+    birthday: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].date({
+        message: "Vui lòng nhập ngày sinh. "
+    }),
+    sex: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].enum([
+        "male",
+        "female"
+    ], {
+        message: "Vui lòng nhập giới tính. "
+    }),
+    img: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zod$2f$lib$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["z"].instanceof(File, {
+        message: "Vui lòng nhập hình ảnh. "
+    })
+});
+const TeacherForm = ({ type, data })=>{
+    _s();
+    const { register, handleSubmit, formState: { errors } } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$hook$2d$form$2f$dist$2f$index$2e$esm$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useForm"])({
+        resolver: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$hookform$2f$resolvers$2f$zod$2f$dist$2f$zod$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["zodResolver"])(schema)
+    });
+    const onSubmit = handleSubmit((data)=>{
+        console.log(data);
+    });
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+        className: "flex flex-col gap-8",
+        onSubmit: onSubmit,
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex items-center gap-2",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        src: "/adduser.png",
+                        alt: "",
+                        width: 40,
+                        height: 40
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 51,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                        className: "text-xl font-semibold",
+                        children: " Thêm giáo viên mới"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 52,
+                        columnNumber: 17
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 50,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                className: "text-xs text-gray-400 font-medium",
+                children: "Thông tin xác thực"
+            }, void 0, false, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 54,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex justify-between flex-wrap gap-4",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Tên người dùng ",
+                        name: "username",
+                        defaultValue: data?.username,
+                        register: register,
+                        error: errors?.username
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 58,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Email",
+                        name: "email",
+                        defaultValue: data?.email,
+                        register: register,
+                        error: errors?.email
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 65,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Mật khẩu ",
+                        name: "password",
+                        type: "password",
+                        defaultValue: data?.password,
+                        register: register,
+                        error: errors?.password
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 72,
+                        columnNumber: 17
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 57,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                className: "text-xs text-gray-400 font-medium",
+                children: "Personal Information"
+            }, void 0, false, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 81,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex justify-between flex-wrap gap-4",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Tên",
+                        name: "firstName",
+                        defaultValue: data?.firstName,
+                        register: register,
+                        error: errors.firstName
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 85,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Họ",
+                        name: "lastName",
+                        defaultValue: data?.lastName,
+                        register: register,
+                        error: errors.lastName
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 92,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Số điện thoại",
+                        name: "phone",
+                        defaultValue: data?.phone,
+                        register: register,
+                        error: errors.phone
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 99,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Địa chỉ",
+                        name: "address",
+                        defaultValue: data?.address,
+                        register: register,
+                        error: errors.address
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 106,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$InputField$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                        label: "Ngày sinh",
+                        name: "birthday",
+                        defaultValue: data?.birthday,
+                        register: register,
+                        error: errors.birthday,
+                        type: "date"
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 113,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex flex-col gap-2 w-full md:w-1/4",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                className: "text-xs text-gray-500",
+                                children: "Giới tính"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 122,
+                                columnNumber: 21
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                className: "ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full",
+                                ...register("sex"),
+                                defaultValue: data?.sex,
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                        value: "female",
+                                        children: "Female"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                        lineNumber: 128,
+                                        columnNumber: 25
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                        value: "male",
+                                        children: "Male"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                        lineNumber: 129,
+                                        columnNumber: 25
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 123,
+                                columnNumber: 21
+                            }, this),
+                            errors.sex?.message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-xs text-red-400",
+                                children: errors.sex.message.toString()
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 132,
+                                columnNumber: 25
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 121,
+                        columnNumber: 17
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex flex-col gap-2 w-full md:w-1/4 justify-center mt-2",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                className: "text-xs text-gray-500 flex items-center gap-2 cursor-pointer",
+                                htmlFor: "img",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                        src: "/upload.png",
+                                        alt: "",
+                                        width: 28,
+                                        height: 28
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                        lineNumber: 142,
+                                        columnNumber: 25
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Upload a photo"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                        lineNumber: 148,
+                                        columnNumber: 25
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 138,
+                                columnNumber: 21
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                type: "file",
+                                id: "img",
+                                ...register("img"),
+                                className: "hidden"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 150,
+                                columnNumber: 21
+                            }, this),
+                            errors.img?.message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-xs text-red-400",
+                                children: errors.img.message.toString()
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                                lineNumber: 157,
+                                columnNumber: 25
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                        lineNumber: 137,
+                        columnNumber: 17
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 84,
+                columnNumber: 13
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                className: "bg-blue-400 text-white p-2 rounded-md",
+                children: type === "create" ? "Create" : "Update"
+            }, void 0, false, {
+                fileName: "[project]/src/components/forms/TeacherForm.tsx",
+                lineNumber: 163,
+                columnNumber: 13
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/forms/TeacherForm.tsx",
+        lineNumber: 49,
+        columnNumber: 9
+    }, this);
+};
+_s(TeacherForm, "yH60Ex0y+dndHS2LMfYpmOevcSo=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2d$hook$2d$form$2f$dist$2f$index$2e$esm$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useForm"]
+    ];
+});
+_c = TeacherForm;
+const __TURBOPACK__default__export__ = TeacherForm;
+var _c;
+__turbopack_context__.k.register(_c, "TeacherForm");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+"[project]/src/components/FormModal.tsx [app-client] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "default": (()=>__TURBOPACK__default__export__)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$forms$2f$TeacherForm$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/forms/TeacherForm.tsx [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
+"use client";
+;
+;
+;
+const FormModal = ({ table, type, data, id })=>{
+    _s();
+    const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
+    const bgColor = type === "create" ? "bg-[var(--yellow-pastel)]" : type === "update" ? "bg-[var(--blue-pastel)]" : "bg-[var(--purple-pastel)]";
+    const [open, setOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const Form = ()=>{
+        return type === "delete" && id ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
+            action: "",
+            className: "p-4 gap-4 flex flex-col items-center justify-center",
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                    src: "/warning.png",
+                    alt: "",
+                    width: 150,
+                    height: 150
+                }, void 0, false, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 48,
+                    columnNumber: 17
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                    className: "text-center font-semibold text-2xl uppercase",
+                    children: "Bạn có chắc chắn muốn xóa?"
+                }, void 0, false, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 49,
+                    columnNumber: 17
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                    className: "text-center font-medium text-lg text-gray-500",
+                    children: "Dữ liệu sẽ không thể được khôi phục."
+                }, void 0, false, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 52,
+                    columnNumber: 17
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex gap-8 mt-8",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                            className: "bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300",
+                            children: "Hủy"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FormModal.tsx",
+                            lineNumber: 56,
+                            columnNumber: 21
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                            className: "bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300",
+                            children: "Xóa"
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FormModal.tsx",
+                            lineNumber: 59,
+                            columnNumber: 21
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 55,
+                    columnNumber: 17
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/src/components/FormModal.tsx",
+            lineNumber: 44,
+            columnNumber: 13
+        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$forms$2f$TeacherForm$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+            type: "update",
+            data: data
+        }, void 0, false, {
+            fileName: "[project]/src/components/FormModal.tsx",
+            lineNumber: 65,
+            columnNumber: 13
+        }, this);
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                className: `${size} ${bgColor} flex items-center justify-center rounded-full cursor-pointer `,
+                onClick: ()=>setOpen(true),
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                    src: `/${type}.png`,
+                    alt: "",
+                    width: 16,
+                    height: 16
+                }, void 0, false, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 74,
+                    columnNumber: 17
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/FormModal.tsx",
+                lineNumber: 70,
+                columnNumber: 13
+            }, this),
+            open && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: " z-50 w-screen h-screen absolute left-0 top-0  bg-black/60 flex items-center justify-center",
+                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] z-50",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(Form, {}, void 0, false, {
+                            fileName: "[project]/src/components/FormModal.tsx",
+                            lineNumber: 79,
+                            columnNumber: 25
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "absolute top-4 right-4 cursor-pointer",
+                            onClick: ()=>setOpen(false),
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                src: "/close.png",
+                                alt: "",
+                                width: 14,
+                                height: 14
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/FormModal.tsx",
+                                lineNumber: 84,
+                                columnNumber: 29
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/src/components/FormModal.tsx",
+                            lineNumber: 80,
+                            columnNumber: 25
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/src/components/FormModal.tsx",
+                    lineNumber: 78,
+                    columnNumber: 21
+                }, this)
+            }, void 0, false, {
+                fileName: "[project]/src/components/FormModal.tsx",
+                lineNumber: 77,
+                columnNumber: 17
+            }, this)
+        ]
+    }, void 0, true);
+};
+_s(FormModal, "xG1TONbKtDWtdOTrXaTAsNhPg/Q=");
+_c = FormModal;
+const __TURBOPACK__default__export__ = FormModal;
+var _c;
+__turbopack_context__.k.register(_c, "FormModal");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);
+}
+}}),
+}]);
+
+//# sourceMappingURL=src_94cc15bf._.js.map
