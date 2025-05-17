@@ -3,6 +3,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScoreDetailController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\RuleController;
+use App\Http\Controllers\ClassController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,4 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('score-details', ScoreDetailController::class);
     Route::apiResource('grades', GradeController::class);
     Route::apiResource('rules', RuleController::class);
+    Route::apiResource('classes', ClassController::class);
+    Route::apiResource('users', UserController::class);
 });
