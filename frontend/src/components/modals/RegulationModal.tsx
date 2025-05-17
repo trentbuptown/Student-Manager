@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Rule } from '@/services/ruleService';
 
 interface RegulationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: any) => void;
-    initialData?: {
-        id?: number;
-        title: string;
-        content: string;
-    };
+    onSubmit: (data: { title: string; content: string }) => void;
+    initialData?: Rule | null;
     mode: 'add' | 'edit';
 }
 
