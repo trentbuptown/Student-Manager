@@ -48,7 +48,7 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:subjects,name,' . $subject->id
+            'name' => 'string|max:255|unique:subjects,name,' . $subject->id
         ]);
 
         if ($validator->fails()) {

@@ -6,6 +6,12 @@ use App\Http\Controllers\RuleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClassController;
+use App\Http\Controllers\TeacherSubjectController;
+use App\Http\Controllers\ScoreController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\SubjectController;
+
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -23,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Admin routes
-    Route::middleware('admin')->group(function () {
+    Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
         Route::post('/register', [AuthController::class, 'registerUser']);
     });
 
@@ -31,4 +37,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('grades', GradeController::class);
     Route::apiResource('rules', RuleController::class);
     Route::apiResource('classes', ClassController::class);
+    Route::apiResource('teachers', TeacherController::class);
+    Route::apiResource('subjects', SubjectController::class);
+
+    // Teacher Subject Routes
+    Route::apiResource('teacher-subjects', TeacherSubjectController::class);
+
+    // Score Routes
+    Route::apiResource('scores', ScoreController::class);
 });
