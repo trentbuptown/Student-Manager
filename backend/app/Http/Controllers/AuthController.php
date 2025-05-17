@@ -22,6 +22,8 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+            // Tải các mối quan hệ admin, teacher và student
+            $user->load(['admin', 'teacher', 'student']);
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -46,6 +48,58 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Đăng xuất thành công'
         ]);
+    }
+
+    /**
+     * Thay đổi mật khẩu người dùng
+     */
+    public function changePassword(Request $request)
+    {
+        // Kiểm tra xem người dùng có phải là admin không
+        $isAdmin = $request->user()->admin()->exists();
+        $userId = $request->user()->id;
+        
+        // Nếu là admin và có truyền user_id, thì đổi mật khẩu cho người dùng đó
+        if ($isAdmin && $request->has('is_admin') && $request->has('user_id')) {
+            $validated = $request->validate([
+                'new_password' => 'required|string|min:8|confirmed',
+                'user_id' => 'required|exists:users,id',
+            ]);
+            
+            $user = User::findOrFail($validated['user_id']);
+            $user->password = Hash::make($validated['new_password']);
+            $user->save();
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Thay đổi mật khẩu thành công'
+            ]);
+        } else {
+            // Trường hợp người dùng thay đổi mật khẩu của chính họ
+            $validated = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
+
+            $user = $request->user();
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Mật khẩu hiện tại không đúng'
+                ], 422);
+            }
+
+            // Cập nhật mật khẩu mới
+            $user->password = Hash::make($validated['new_password']);
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Thay đổi mật khẩu thành công'
+            ]);
+        }
     }
 
     public function registerFirstAdmin(Request $request)

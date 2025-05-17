@@ -1,5 +1,6 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 export type Grade = {
     id: number;
@@ -25,11 +26,11 @@ export type GradeUpdateParams = {
     name: string;
 };
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "/grades";
 
 export const getAllGrades = async (): Promise<Grade[]> => {
     try {
-        const response = await axios.get(`${API_URL}/grades`);
+        const response = await axiosClient.get(API_URL);
         return response.data.data;
     } catch (error) {
         console.error("Error fetching grades:", error);
@@ -40,7 +41,7 @@ export const getAllGrades = async (): Promise<Grade[]> => {
 
 export const getGradeById = async (id: number): Promise<Grade> => {
     try {
-        const response = await axios.get(`${API_URL}/grades/${id}`);
+        const response = await axiosClient.get(`${API_URL}/${id}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error fetching grade ${id}:`, error);
@@ -51,17 +52,11 @@ export const getGradeById = async (id: number): Promise<Grade> => {
 
 export const createGrade = async (data: GradeCreateParams): Promise<Grade> => {
     try {
-        const response = await axios.post(`${API_URL}/grades`, data, {
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            withCredentials: true,
-        });
+        const response = await axiosClient.post(API_URL, data);
         return response.data.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating grade:", error);
-        if (axios.isAxiosError(error) && error.response?.data?.message) {
+        if (error.response?.data?.message) {
             toast.error(error.response.data.message);
         } else {
             toast.error("Không thể tạo khối lớp mới");
@@ -75,17 +70,11 @@ export const updateGrade = async (
     data: GradeUpdateParams
 ): Promise<Grade> => {
     try {
-        const response = await axios.put(`${API_URL}/grades/${id}`, data, {
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            withCredentials: true,
-        });
+        const response = await axiosClient.put(`${API_URL}/${id}`, data);
         return response.data.data;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`Error updating grade ${id}:`, error);
-        if (axios.isAxiosError(error) && error.response?.data?.message) {
+        if (error.response?.data?.message) {
             toast.error(error.response.data.message);
         } else {
             toast.error("Không thể cập nhật khối lớp");
@@ -96,12 +85,10 @@ export const updateGrade = async (
 
 export const deleteGrade = async (id: number): Promise<void> => {
     try {
-        await axios.delete(`${API_URL}/grades/${id}`, {
-            withCredentials: true,
-        });
-    } catch (error) {
+        await axiosClient.delete(`${API_URL}/${id}`);
+    } catch (error: any) {
         console.error(`Error deleting grade ${id}:`, error);
-        if (axios.isAxiosError(error) && error.response?.data?.message) {
+        if (error.response?.data?.message) {
             toast.error(error.response.data.message);
         } else {
             toast.error("Không thể xóa khối lớp");

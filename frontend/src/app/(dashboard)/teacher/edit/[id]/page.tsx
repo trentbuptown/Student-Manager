@@ -17,7 +17,9 @@ export default function EditTeacherPage() {
   const [formData, setFormData] = useState<TeacherUpdateParams>({
     name: '',
     specialization: '',
-    is_gvcn: false
+    is_gvcn: false,
+    phone: '',
+    address: ''
   });
 
   useEffect(() => {
@@ -29,7 +31,9 @@ export default function EditTeacherPage() {
           setFormData({
             name: data.name,
             specialization: data.specialization,
-            is_gvcn: data.is_gvcn
+            is_gvcn: data.is_gvcn,
+            phone: data.phone || '',
+            address: data.address || ''
           });
         } else {
           toast.error('Không tìm thấy thông tin giáo viên');
@@ -120,6 +124,32 @@ export default function EditTeacherPage() {
                   value={formData.specialization || ''}
                   onChange={handleChange}
                   required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Số điện thoại
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Địa chỉ
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address || ''}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

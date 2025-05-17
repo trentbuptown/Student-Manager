@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, FormEvent, ChangeEvent } from "react";
-import { login, LoginData } from "@/services/auth.service";
+import { useState, FormEvent, ChangeEvent, useEffect } from "react";
+import { login, LoginData, isAuthenticated, isTeacher, isStudent, isAdmin } from "@/services/auth.service";
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState<LoginData>({
@@ -12,7 +13,37 @@ const LoginPage = () => {
     });
     const [error, setError] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [redirecting, setRedirecting] = useState<boolean>(false);
     const router = useRouter();
+
+    // Kiểm tra nếu người dùng đã đăng nhập, chuyển hướng họ đến trang tương ứng
+    useEffect(() => {
+        const checkAuth = async () => {
+            if (typeof window !== 'undefined') {
+                if (isAuthenticated()) {
+                    setRedirecting(true);
+                    console.log('User is already authenticated, redirecting...');
+                    
+                    // Chuyển hướng dựa trên vai trò
+                    if (isTeacher()) {
+                        console.log('Redirecting to teacher dashboard');
+                        router.replace('/teacher-dashboard');
+                    } else if (isStudent()) {
+                        console.log('Redirecting to student dashboard');
+                        router.replace('/student-dashboard');
+                    } else if (isAdmin()) {
+                        console.log('Redirecting to admin dashboard');
+                        router.replace('/dashboard');
+                    } else {
+                        console.log('Role not determined, redirecting to home');
+                        router.replace('/');
+                    }
+                }
+            }
+        };
+        
+        checkAuth();
+    }, [router]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -35,32 +66,50 @@ const LoginPage = () => {
                 return;
             }
 
+            console.log('Đang đăng nhập với:', formData.email);
             const response = await login(formData);
+            console.log('Phản hồi đăng nhập:', response);
             
-            // Lưu token và thông tin user vào localStorage
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("user", JSON.stringify(response.user));
+            // Hiển thị thông báo thành công
+            toast.success('Đăng nhập thành công!');
             
-            // Lưu token vào cookie để middleware có thể đọc được
-            // Thiết lập cookie với thời hạn 7 ngày, đảm bảo cookie được gửi trong mọi request
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + 7);
-            document.cookie = `auth_token=${response.token}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+            // Chuyển hướng dựa trên vai trò của người dùng
+            setRedirecting(true);
+            const user = response.user;
             
-            console.log("Đăng nhập thành công, chuyển hướng đến /dashboard");
-            
-            // Thêm một khoảng thời gian ngắn để đảm bảo cookie được lưu trước khi chuyển trang
-            setTimeout(() => {
-                // Chuyển hướng đến trang dashboard
-                router.push("/dashboard");
-            }, 100);
+            if (user.teacher) {
+                console.log("Người dùng là giáo viên, chuyển hướng đến /teacher-dashboard");
+                router.push('/teacher-dashboard');
+            } else if (user.student) {
+                console.log("Người dùng là học sinh, chuyển hướng đến /student-dashboard");
+                router.push('/student-dashboard');
+            } else if (user.admin) {
+                console.log("Người dùng là admin, chuyển hướng đến /dashboard");
+                router.push('/dashboard');
+            } else {
+                console.log("Vai trò không xác định, chuyển hướng đến trang chủ");
+                router.push('/');
+            }
         } catch (err: any) {
             console.error("Lỗi đăng nhập:", err);
             setError(err.response?.data?.message || "Có lỗi xảy ra khi đăng nhập");
+            toast.error('Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    if (redirecting) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[var(--blue-pastel)]">
+                <div className="bg-white p-8 rounded-lg shadow-md text-center">
+                    <h2 className="text-xl font-semibold mb-4">Đăng nhập thành công!</h2>
+                    <p className="mb-4">Đang chuyển hướng đến trang chính...</p>
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen items-center justify-center bg-[var(--blue-pastel)] p-4 sm:p-6 md:p-8 lg:p-12">
@@ -89,7 +138,7 @@ const LoginPage = () => {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {error && (
-                                <div className="text-red-500 text-sm">
+                                <div className="text-red-500 text-sm p-3 bg-red-50 rounded-md">
                                     {error}
                                 </div>
                             )}

@@ -3,9 +3,7 @@ import { date, z } from "zod";
 export const subjectSchema = z.object({
     id: z.coerce.number().optional(),
     name: z.string().min(1, { message: "Vui lòng nhập tên môn học." }),
-    code: z.string().min(1, { message: "Vui lòng nhập mã môn học." }),
-    description: z.string().optional(),
-    teachers: z.array(z.string()).optional(), //teacher ids - Made optional as it might not be required for create/update
+    teachers: z.array(z.string()), //teacher ids
 });
 
 export type SubjectSchema = z.infer<typeof subjectSchema>;
@@ -23,29 +21,20 @@ export const classSchema = z.object({
 export type ClassSchema = z.infer<typeof classSchema>;
 
 export const teacherSchema = z.object({
-    id: z.string().optional(),
-    username: z
-        .string()
-        .min(3, { message: "Tên người dùng phải chứa ít nhất 4 ký tự. " })
-        .max(20, { message: "Tên người dùng không được vượt quá 20 ký tự." }),
-    password: z
-        .string()
-        .min(8, { message: "Mật khẩu phải chứa ít nhất 8 ký tự. " })
-        .optional()
-        .or(z.literal("")),
-    firstName: z.string().min(1, { message: "Vui lòng nhập tên." }),
-    lastName: z.string().min(1, { message: " Vui lòng nhập họ." }),
-    email: z
-        .string()
-        .email({ message: "Email không hợp lệ." })
-        .optional()
-        .or(z.literal("")),
-    phone: z.string().optional(),
-    address: z.string(),
-    img: z.string().optional(),
-    birthday: z.coerce.date({ message: "Vui lòng nhập ngày sinh." }),
+    id: z.number().optional(),
+    name: z.string().min(1, { message: "Vui lòng nhập họ và tên giáo viên." }),
+    specialization: z.string().min(1, { message: "Vui lòng nhập chuyên môn." }),
+    is_gvcn: z.boolean().or(z.enum(["true", "false"])),
+    user_id: z.number().optional(),
+    phone: z.string().optional().or(z.literal("")),
+    address: z.string().optional().or(z.literal("")),
+    user_name: z.string().min(1, { message: "Vui lòng nhập tên hiển thị." }),
+    email: z.string().email({ message: "Email không hợp lệ." }),
+    username: z.string().optional().or(z.literal("")),
+    password: z.string().min(8, { message: "Mật khẩu phải chứa ít nhất 8 ký tự." }).optional(),
+    birthday: z.string().optional().or(z.literal("")),
     sex: z.enum(["MALE", "FEMALE"], { message: "Vui lòng chọn giới tính." }),
-    subjects: z.array(z.coerce.number()).optional(), // subject ids
+    profile_photo: z.string().optional().or(z.literal("")),
 });
 
 export type TeacherSchema = z.infer<typeof teacherSchema>;

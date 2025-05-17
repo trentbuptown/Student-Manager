@@ -28,16 +28,76 @@ export interface RegisterData {
     class_id?: number;
 }
 
+export interface ChangePasswordData {
+    current_password?: string;
+    new_password: string;
+    new_password_confirmation: string;
+    is_admin?: boolean;
+    user_id?: number;
+}
+
+export interface ChangePasswordResponse {
+    status: string;
+    message: string;
+}
+
+// Hàm để thiết lập cookie
+const setCookie = (name: string, value: string, days: number = 7) => {
+    if (typeof document === 'undefined') return;
+    
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + days);
+    document.cookie = `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/; SameSite=Lax`;
+};
+
+// Hàm để xóa cookie
+const deleteCookie = (name: string) => {
+    if (typeof document === 'undefined') return;
+    
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
 export const login = async (data: LoginData): Promise<LoginResponse> => {
-    const response = await axiosClient.post('/login', data);
-    
-    // Lưu token và thông tin user vào localStorage
-    if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+    try {
+        const response = await axiosClient.post('/login', data);
+        
+        // Lưu token và thông tin user vào localStorage
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            
+            // Xác định vai trò người dùng
+            let userRole = 'user';
+            const user = response.data.user;
+            
+            console.log('User data from API:', user);
+            
+            // Kiểm tra sự tồn tại của các mối quan hệ
+            if (user.admin) {
+                userRole = 'admin';
+                console.log('User role identified as admin');
+            } else if (user.teacher) {
+                userRole = 'teacher';
+                console.log('User role identified as teacher');
+            } else if (user.student) {
+                userRole = 'student';
+                console.log('User role identified as student');
+            } else {
+                console.log('User role could not be determined from:', user);
+            }
+            
+            // Lưu token và vai trò vào cookie
+            setCookie('auth_token', response.data.token);
+            setCookie('user_role', userRole);
+            
+            console.log('Đăng nhập thành công, đã lưu token và vai trò:', userRole);
+        }
+        
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi trong quá trình đăng nhập:', error);
+        throw error;
     }
-    
-    return response.data;
 };
 
 export const logout = async (): Promise<void> => {
@@ -45,18 +105,34 @@ export const logout = async (): Promise<void> => {
         // Gọi API logout nếu token tồn tại
         const token = localStorage.getItem('token');
         if (token) {
-            await axiosClient.post('/logout');
+            try {
+                await axiosClient.post('/logout');
+                console.log('Đăng xuất API thành công');
+            } catch (error) {
+                console.error('Lỗi khi gọi API đăng xuất:', error);
+            }
         }
-    } catch (error) {
-        console.error('Lỗi khi đăng xuất:', error);
     } finally {
-        // Xóa token và user khỏi localStorage
+        // Luôn xóa token và user khỏi localStorage, ngay cả khi API call thất bại
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        
+        // Xóa cookie auth_token và user_role
+        deleteCookie('auth_token');
+        deleteCookie('user_role');
+        
+        console.log('Đã xóa token và thông tin người dùng khỏi localStorage và cookie');
     }
 };
 
+export const changePassword = async (data: ChangePasswordData): Promise<ChangePasswordResponse> => {
+    const response = await axiosClient.post('/change-password', data);
+    return response.data;
+};
+
 export const getCurrentUser = (): any => {
+    if (typeof window === 'undefined') return null;
+    
     const userStr = localStorage.getItem('user');
     if (userStr) {
         try {
@@ -69,6 +145,7 @@ export const getCurrentUser = (): any => {
 };
 
 export const getToken = (): string | null => {
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('token');
 };
 
@@ -78,15 +155,15 @@ export const isAuthenticated = (): boolean => {
 
 export const isTeacher = (): boolean => {
     const user = getCurrentUser();
-    return user && user.teacher;
+    return user && user.teacher !== undefined && user.teacher !== null;
 };
 
 export const isStudent = (): boolean => {
     const user = getCurrentUser();
-    return user && user.student;
+    return user && user.student !== undefined && user.student !== null;
 };
 
 export const isAdmin = (): boolean => {
     const user = getCurrentUser();
-    return user && user.admin;
+    return user && user.admin !== undefined && user.admin !== null;
 }; 

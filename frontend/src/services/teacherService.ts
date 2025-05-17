@@ -7,6 +7,8 @@ export type Teacher = {
   specialization: string;
   is_gvcn: boolean;
   user_id: number;
+  phone?: string;
+  address?: string;
   created_at?: string;
   updated_at?: string;
   user?: {
@@ -29,6 +31,8 @@ export type TeacherCreateParams = {
   specialization: string;
   is_gvcn: boolean;
   user_id: number;
+  phone?: string;
+  address?: string;
   // Thông tin user nếu cần tạo mới user
   user?: {
     name: string;
@@ -48,6 +52,8 @@ export type TeacherUpdateParams = {
   specialization?: string;
   is_gvcn?: boolean;
   user_id?: number;
+  phone?: string;
+  address?: string;
   // Thông tin user nếu cần cập nhật user
   user?: {
     name?: string;
@@ -69,6 +75,8 @@ const transformTeacherData = (teacher: any): Teacher => {
     specialization: teacher.specialization,
     is_gvcn: teacher.is_gvcn,
     user_id: teacher.user_id,
+    phone: teacher.phone,
+    address: teacher.address,
     created_at: teacher.created_at,
     updated_at: teacher.updated_at,
     user: teacher.user,
@@ -106,6 +114,9 @@ export const getTeacherById = async (id: number): Promise<Teacher | null> => {
 // Tạo giáo viên mới
 export const createTeacher = async (params: TeacherCreateParams): Promise<Teacher | null> => {
   try {
+    // Log dữ liệu gửi đi để debug
+    console.log('Dữ liệu gửi đi:', JSON.stringify(params));
+    
     const response = await axiosClient.post('/teachers', params);
     toast.success('Thêm giáo viên thành công');
     return transformTeacherData(response.data);
@@ -113,19 +124,42 @@ export const createTeacher = async (params: TeacherCreateParams): Promise<Teache
     console.error('Error creating teacher:', error);
     
     // Xử lý lỗi chi tiết từ backend
-    if (error.response && error.response.data) {
-      if (error.response.data.errors) {
-        // Hiển thị tất cả các lỗi validation
-        const errorMessages: string[] = Object.values(error.response.data.errors).flat() as string[];
-        errorMessages.forEach((msg: string) => toast.error(msg));
-      } else if (error.response.data.message) {
-        // Hiển thị thông báo lỗi từ server
-        toast.error(error.response.data.message);
+    if (error.response) {
+      console.log('Response status:', error.response.status);
+      console.log('Response data:', error.response.data);
+      
+      if (error.response.status === 422) {
+        console.log('Validation errors:', error.response.data.errors);
+        
+        if (error.response.data.errors) {
+          // Hiển thị tất cả các lỗi validation
+          Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+            console.log(`Field ${field}:`, messages);
+            (messages as string[]).forEach((msg: string) => {
+              toast.error(`${field}: ${msg}`);
+            });
+          });
+        } else if (error.response.data.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại các trường bắt buộc.');
+        }
       } else {
-        toast.error('Không thể thêm giáo viên');
+        // Xử lý các lỗi khác
+        if (error.response.data.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error(`Lỗi ${error.response.status}: Không thể thêm giáo viên`);
+        }
       }
+    } else if (error.request) {
+      // Yêu cầu đã được gửi nhưng không nhận được phản hồi
+      console.log('No response received:', error.request);
+      toast.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
     } else {
-      toast.error('Không thể thêm giáo viên');
+      // Lỗi khi thiết lập request
+      console.log('Error setting up request:', error.message);
+      toast.error('Lỗi kết nối: ' + error.message);
     }
     
     return null;

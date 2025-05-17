@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import axios from "axios";
+import axiosClient from "./axiosClient";
 
 export type Class = {
     id: number;
@@ -27,12 +27,12 @@ export type ClassUpdateParams = {
     supervisor?: string;
 };
 
-const API_URL = "/api/classes";
+const API_URL = "/classes";
 
 // Lấy danh sách tất cả lớp học
 export const getClasses = async (): Promise<Class[]> => {
     try {
-        const response = await axios.get(API_URL);
+        const response = await axiosClient.get(API_URL);
         return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error) {
         console.error("Error fetching classes:", error);
@@ -44,7 +44,7 @@ export const getClasses = async (): Promise<Class[]> => {
 // Lấy thông tin chi tiết một lớp học
 export const getClassById = async (id: number) => {
     try {
-        const response = await axios.get(`${API_URL}/${id}`);
+        const response = await axiosClient.get(`${API_URL}/${id}`);
         return response.data.data;
     } catch (error) {
         throw error;
@@ -54,7 +54,7 @@ export const getClassById = async (id: number) => {
 // Tạo lớp học mới
 export const createClass = async (data: Omit<Class, "id">) => {
     try {
-        const response = await axios.post(API_URL, data);
+        const response = await axiosClient.post(API_URL, data);
         return response.data;
     } catch (error) {
         throw error;
@@ -64,7 +64,7 @@ export const createClass = async (data: Omit<Class, "id">) => {
 // Cập nhật thông tin lớp học
 export const updateClass = async (id: number, data: Partial<Class>) => {
     try {
-        const response = await axios.put(`${API_URL}/${id}`, data);
+        const response = await axiosClient.put(`${API_URL}/${id}`, data);
         return response.data;
     } catch (error) {
         throw error;
@@ -74,7 +74,7 @@ export const updateClass = async (id: number, data: Partial<Class>) => {
 // Xóa một lớp học
 export const deleteClass = async (id: number) => {
     try {
-        const response = await axios.delete(`${API_URL}/${id}`);
+        const response = await axiosClient.delete(`${API_URL}/${id}`);
         return response.data;
     } catch (error) {
         throw error;

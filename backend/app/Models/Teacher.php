@@ -16,6 +16,8 @@ class Teacher extends Model
         'specialization',
         'is_gvcn',
         'user_id',
+        'phone',
+        'address',
     ];
 
     public function user()

@@ -45,17 +45,17 @@ export const getUser = () => {
 // Kiểm tra xem người dùng có phải là giáo viên không
 export const isTeacher = (): boolean => {
   const user = getUser();
-  return user && user.teacher;
+  return user && user.teacher !== undefined && user.teacher !== null;
 };
 
 // Kiểm tra xem người dùng có phải là học sinh không
 export const isStudent = (): boolean => {
   const user = getUser();
-  return user && user.student;
+  return user && user.student !== undefined && user.student !== null;
 };
 
 // Kiểm tra xem người dùng có phải là admin không
 export const isAdmin = (): boolean => {
   const user = getUser();
-  return user && user.admin;
+  return user && user.admin !== undefined && user.admin !== null;
 }; 
