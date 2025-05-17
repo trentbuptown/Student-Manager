@@ -5,7 +5,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\RuleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ClassController;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -30,4 +30,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('score-details', ScoreDetailController::class);
     Route::apiResource('grades', GradeController::class);
     Route::apiResource('rules', RuleController::class);
+    Route::apiResource('classes', ClassController::class);
 });
