@@ -11,12 +11,14 @@ const axiosClient = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  // Thêm withCredentials để gửi cookie nếu cần
+  withCredentials: true,
 });
 
 // Thêm interceptor để tự động thêm token vào header
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -40,7 +42,10 @@ axiosClient.interceptors.response.use(
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/sign-in';
+        // Không chuyển hướng tự động nếu đang ở trang logout
+        if (!window.location.pathname.includes('/logout')) {
+          window.location.href = '/sign-in';
+        }
       }
     }
     return Promise.reject(error);

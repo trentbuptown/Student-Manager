@@ -10,6 +10,7 @@ import FormModal from "@/components/FormModal";
 import { useEffect, useState } from "react";
 import { Teacher, getAllTeachers, deleteTeacher } from "@/services/teacherService";
 import { toast } from "react-toastify";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
 const columns = [
     {
@@ -53,6 +54,8 @@ const TeacherListPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [selectedTeacherId, setSelectedTeacherId] = useState<number | null>(null);
     
     // Lấy danh sách giáo viên khi component mount
     useEffect(() => {
@@ -94,7 +97,8 @@ const TeacherListPage = () => {
         teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
         teacher.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         teacher.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (teacher.user?.phone && teacher.user.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+        (teacher.phone && teacher.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (teacher.address && teacher.address.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     
     // Phân trang
@@ -109,6 +113,18 @@ const TeacherListPage = () => {
         setCurrentPage(1); // Reset về trang đầu tiên khi tìm kiếm
     };
 
+    // Xử lý mở modal đổi mật khẩu
+    const handleOpenPasswordModal = (teacherId: number) => {
+        setSelectedTeacherId(teacherId);
+        setPasswordModalOpen(true);
+    };
+
+    // Xử lý đóng modal đổi mật khẩu
+    const handleClosePasswordModal = () => {
+        setPasswordModalOpen(false);
+        setSelectedTeacherId(null);
+    };
+
     const renderRow = (item: Teacher) => (
         <tr
             key={item.id}
@@ -116,7 +132,7 @@ const TeacherListPage = () => {
         >
             <td className="flex items-center gap-4 p-4">
                 <Image
-                    src={item.user?.profile_photo || "https://via.placeholder.com/40"}
+                    src={item.user?.profile_photo || "/avatar.png"}
                     alt=""
                     width={40}
                     height={40}
@@ -130,10 +146,20 @@ const TeacherListPage = () => {
             <td className="hidden md:table-cell">{item.specialization || "-"}</td>
             <td className="hidden md:table-cell">{item.is_gvcn ? "Có" : "Không"}</td>
             <td className="hidden md:table-cell">{item.user?.email || "-"}</td>
-            <td className="hidden md:table-cell">{item.user?.phone || "-"}</td>
-            <td className="hidden md:table-cell">{item.user?.address || "-"}</td>
+            <td className="hidden md:table-cell">{item.phone || "-"}</td>
+            <td className="hidden md:table-cell">{item.address || "-"}</td>
             <td>
                 <div className="flex items-center gap-2">
+                    <button
+                        className="w-7 h-7 bg-[var(--blue-pastel)] flex items-center justify-center rounded-full cursor-pointer"
+                        title="Đổi mật khẩu"
+                        onClick={() => handleOpenPasswordModal(item.user?.id || 0)}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </button>
                     {role === "admin" && (
                         <>
                             <FormModal
@@ -220,6 +246,14 @@ const TeacherListPage = () => {
                         onPageChange={setCurrentPage}
                     />
                 </>
+            )}
+
+            {passwordModalOpen && selectedTeacherId && (
+                <ChangePasswordModal 
+                    userId={selectedTeacherId}
+                    isOpen={passwordModalOpen}
+                    onClose={handleClosePasswordModal}
+                />
             )}
         </div>
     );

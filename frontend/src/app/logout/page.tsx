@@ -9,14 +9,20 @@ export default function LogoutPage() {
 
   useEffect(() => {
     const handleLogout = async () => {
+      console.log('Bắt đầu quá trình đăng xuất');
       try {
         // Gọi API logout - hàm này đã được cập nhật để xử lý lỗi
         await logout();
+        console.log('Đã gọi hàm logout thành công');
       } catch (error) {
         console.error('Lỗi khi đăng xuất:', error);
       } finally {
         // Luôn chuyển hướng về trang đăng nhập, ngay cả khi có lỗi
-        router.push('/sign-in');
+        console.log('Chuyển hướng đến trang đăng nhập');
+        // Thêm timeout ngắn để đảm bảo localStorage đã được xóa
+        setTimeout(() => {
+          router.push('/sign-in');
+        }, 100);
       }
     };
     

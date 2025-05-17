@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Teacher;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class TeacherController extends Controller
 {
@@ -22,19 +25,76 @@ class TeacherController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'specialization' => 'required|string|max:255',
-            'is_gvcn' => 'required|boolean',
-            'user_id' => 'required|exists:users,id'
-        ]);
+        // Kiểm tra nếu có thông tin user mới
+        if ($request->has('user') && (!$request->user_id || $request->user_id == 0)) {
+            // Validate thông tin user
+            $userValidator = Validator::make($request->user, [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($userValidator->fails()) {
+                return response()->json(['errors' => $userValidator->errors()], 422);
+            }
+
+            // Validate thông tin giáo viên
+            $teacherValidator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'specialization' => 'required|string|max:255',
+                'is_gvcn' => 'required|boolean',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:255',
+            ]);
+
+            if ($teacherValidator->fails()) {
+                return response()->json(['errors' => $teacherValidator->errors()], 422);
+            }
+
+            try {
+                DB::beginTransaction();
+
+                // Tạo user mới
+                $user = User::create([
+                    'name' => $request->user['name'],
+                    'email' => $request->user['email'],
+                    'password' => Hash::make($request->user['password']),
+                ]);
+
+                // Tạo giáo viên với user_id mới
+                $teacher = Teacher::create([
+                    'name' => $request->name,
+                    'specialization' => $request->specialization,
+                    'is_gvcn' => $request->is_gvcn,
+                    'user_id' => $user->id,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                ]);
+
+                DB::commit();
+                return response()->json($teacher->load('user'), 201);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json(['errors' => ['general' => ['Lỗi khi tạo giáo viên và tài khoản: ' . $e->getMessage()]]], 500);
+            }
+        } else {
+            // Xử lý trường hợp chỉ tạo giáo viên với user_id có sẵn
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'specialization' => 'required|string|max:255',
+                'is_gvcn' => 'required|boolean',
+                'user_id' => 'required|exists:users,id',
+                'phone' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            $teacher = Teacher::create($request->all());
+            return response()->json($teacher, 201);
         }
-
-        $teacher = Teacher::create($request->all());
-        return response()->json($teacher, 201);
     }
 
     /**
@@ -53,7 +113,9 @@ class TeacherController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'string|max:255',
             'specialization' => 'string|max:255',
-            'is_gvcn' => 'boolean'
+            'is_gvcn' => 'boolean',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {

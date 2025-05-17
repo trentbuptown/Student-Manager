@@ -91,6 +91,16 @@ export default function TeacherDetailPage() {
               <div>
                 <span className="font-medium text-gray-600">GVCN:</span> {teacher.is_gvcn ? 'Có' : 'Không'}
               </div>
+              {teacher.phone && (
+                <div>
+                  <span className="font-medium text-gray-600">Số điện thoại:</span> {teacher.phone}
+                </div>
+              )}
+              {teacher.address && (
+                <div>
+                  <span className="font-medium text-gray-600">Địa chỉ:</span> {teacher.address}
+                </div>
+              )}
             </div>
           </div>
 
@@ -104,16 +114,6 @@ export default function TeacherDetailPage() {
                 <div>
                   <span className="font-medium text-gray-600">Tên người dùng:</span> {teacher.user.name}
                 </div>
-                {teacher.user.phone && (
-                  <div>
-                    <span className="font-medium text-gray-600">Số điện thoại:</span> {teacher.user.phone}
-                  </div>
-                )}
-                {teacher.user.address && (
-                  <div>
-                    <span className="font-medium text-gray-600">Địa chỉ:</span> {teacher.user.address}
-                  </div>
-                )}
                 {teacher.user.birthday && (
                   <div>
                     <span className="font-medium text-gray-600">Ngày sinh:</span> {teacher.user.birthday}

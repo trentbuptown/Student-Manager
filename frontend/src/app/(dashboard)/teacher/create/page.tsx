@@ -57,11 +57,15 @@ export default function CreateTeacherPage() {
       if (createNewUser) {
         // Nếu tạo user mới, gửi thông tin user và đặt user_id = 0 (sẽ được backend xử lý)
         dataToSubmit = {
-          name: formData.name,
-          specialization: formData.specialization,
-          is_gvcn: formData.is_gvcn,
+          name: formData.name.trim(),
+          specialization: formData.specialization.trim(),
+          is_gvcn: formData.is_gvcn === true,
           user_id: 0, // Giá trị tạm thời, sẽ được backend tạo và gán
-          user: formData.user
+          user: {
+            name: formData.user?.name?.trim() || '',
+            email: formData.user?.email?.trim() || '',
+            password: formData.user?.password || '',
+          }
         };
       } else {
         // Nếu sử dụng user có sẵn, chỉ gửi user_id và không gửi thông tin user
@@ -72,12 +76,14 @@ export default function CreateTeacherPage() {
         }
         
         dataToSubmit = {
-          name: formData.name,
-          specialization: formData.specialization,
-          is_gvcn: formData.is_gvcn,
-          user_id: formData.user_id
+          name: formData.name.trim(),
+          specialization: formData.specialization.trim(),
+          is_gvcn: formData.is_gvcn === true,
+          user_id: Number(formData.user_id)
         };
       }
+
+      console.log('Dữ liệu gửi đi:', JSON.stringify(dataToSubmit));
 
       // Gọi API để tạo giáo viên
       const result = await createTeacher(dataToSubmit);
