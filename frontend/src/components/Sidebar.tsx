@@ -11,7 +11,6 @@ import {
     FaBars,
     FaTimes
 } from 'react-icons/fa';
-import { logout } from '@/services/auth.service';
 
 interface MenuItem {
     name: string;
@@ -51,16 +50,6 @@ const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
-
-    const handleLogout = async () => {
-        try {
-            await logout();
-            localStorage.removeItem('token');
-            router.push('/sign-in');
-        } catch (error) {
-            console.error('Lỗi đăng xuất:', error);
-        }
-    };
 
     return (
         <>
@@ -111,14 +100,15 @@ const Sidebar = () => {
                         ))}
                     </nav>
 
-                    {/* Logout button */}
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center space-x-3 px-4 py-3 m-4 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                    {/* Logout link */}
+                    <Link
+                        href="/sign-in"
+                        onClick={() => localStorage.removeItem('token')}
+                        className="flex items-center space-x-3 px-4 py-3 m-4 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                     >
                         <FaSignOutAlt className="w-5 h-5" />
                         <span>Đăng xuất</span>
-                    </button>
+                    </Link>
                 </div>
             </aside>
         </>

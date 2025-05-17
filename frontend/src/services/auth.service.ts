@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Sử dụng đường dẫn tương đối cho các API calls
+const API_URL = '/api';
 
 export interface LoginResponse {
     status: string;
@@ -15,7 +16,9 @@ export interface LoginData {
 }
 
 export const login = async (data: LoginData): Promise<LoginResponse> => {
-    const response = await axios.post(`${API_URL}/login`, data, {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    
+    const response = await axios.post(`${backendUrl}/login`, data, {
         withCredentials: true,
         headers: {
             'Content-Type': 'application/json',
@@ -26,11 +29,23 @@ export const login = async (data: LoginData): Promise<LoginResponse> => {
 };
 
 export const logout = async (): Promise<void> => {
-    await axios.post(`${API_URL}/logout`, {}, {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-    });
+    try {
+        const token = localStorage.getItem('token');
+        
+        // Sử dụng đường dẫn tuyệt đối đến backend API
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+        
+        await axios.post(`${backendUrl}/logout`, {}, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi khi gọi API đăng xuất:', error);
+        // Vẫn xóa token ngay cả khi API báo lỗi
+        localStorage.removeItem('token');
+    }
 }; 
