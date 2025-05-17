@@ -4,6 +4,8 @@ import { on } from "events";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { JSX, useState } from "react";
+import subjectService from '@/services/subjectService';
+import { toast } from 'sonner';
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
     loading: () => <p>Loading...</p>,
@@ -81,10 +83,30 @@ const FormModal = ({
     };
 
     const Form = () => {
+        const handleDeleteConfirm = async () => {
+            if (id === undefined) {
+                console.error("Delete action requires an ID.");
+                toast.error('Không thể xóa: Thiếu ID môn học.');
+                return;
+            }
+            try {
+                await subjectService.delete(id);
+                toast.success('Xóa môn học thành công.');
+                handleSuccess();
+            } catch (error) {
+                console.error('Error deleting subject:', error);
+                toast.error('Không thể xóa môn học. Vui lòng thử lại.');
+            }
+        };
+
         return type === "delete" && id ? (
             <form
                 action=""
                 className="p-4 gap-4 flex flex-col items-center justify-center"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleDeleteConfirm();
+                }}
             >
                 <Image src="/warning.png" alt="" width={150} height={150} />
                 <span className="text-center font-semibold text-2xl uppercase">
@@ -103,8 +125,7 @@ const FormModal = ({
                     </button>
                     <button 
                         className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
-                        onClick={handleSuccess}
-                        type="button"
+                        type="submit"
                     >
                         Xóa
                     </button>
