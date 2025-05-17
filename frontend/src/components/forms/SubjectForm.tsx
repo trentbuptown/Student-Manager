@@ -4,36 +4,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { subjectSchema, SubjectSchema } from "@/lib/formValidationSchemas";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { teachersData } from "@/lib/data";
 import Image from "next/image";
-
-type Teacher = {
-    id: number;
-    teacherId: string;
-    name: string;
-    email?: string;
-    photo: string;
-    subjects: string[];
-    classes: string[];
-    phone: string;
-    address: string;
-};
+import subjectService from '@/services/subjectService';
+import { getAllTeachers, Teacher as TeacherInterface } from '@/services/teacherService';
 
 const SubjectForm = ({
     type,
     data,
-    teachers = teachersData,
+    onSuccess
 }: {
     type: "create" | "update";
     data?: any;
-    teachers?: Teacher[];
+    onSuccess?: () => void;
 }) => {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [teachersList, setTeachersList] = useState<TeacherInterface[]>([]);
+    const [loadingTeachers, setLoadingTeachers] = useState(true);
 
     const {
         register,
@@ -41,15 +33,26 @@ const SubjectForm = ({
         formState: { errors },
     } = useForm<SubjectSchema>({
         resolver: zodResolver(subjectSchema),
-        // Nếu có data, sử dụng nó làm giá trị mặc định
         defaultValues: data
             ? {
                   id: data.id,
                   name: data.name,
                   teachers: data.teachers,
+                  code: type === 'update' ? String(data.id) : data.code,
+                  description: data.description,
               }
             : undefined,
     });
+
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            setLoadingTeachers(true);
+            const fetchedTeachers = await getAllTeachers();
+            setTeachersList(fetchedTeachers);
+            setLoadingTeachers(false);
+        };
+        fetchTeachers();
+    }, []);
 
     const onSubmit = handleSubmit(async (formData) => {
         try {
@@ -57,8 +60,20 @@ const SubjectForm = ({
             setError(null);
 
             console.log(formData);
-            // Thêm logic gửi dữ liệu đến API ở đây
-            // const response = await fetch('/api/subjects', {...})
+
+            if (type === 'create') {
+                await subjectService.create({
+                    name: formData.name,
+                    code: formData.code,
+                    description: formData.description,
+                });
+            } else if (type === 'update' && formData.id) {
+                await subjectService.update(formData.id, {
+                     name: formData.name,
+                    code: formData.code,
+                    description: formData.description,
+                });
+            }
 
             toast.success(
                 type === "create"
@@ -66,12 +81,14 @@ const SubjectForm = ({
                     : "Cập nhật môn học thành công"
             );
 
-            // Chuyển hướng sau khi tạo/cập nhật thành công
-            // router.push("/subjects");
-        } catch (err) {
+            if (onSuccess) {
+                console.log('onSuccess called from SubjectForm');
+                onSuccess();
+            }
+        } catch (err: any) {
             console.error(err);
-            setError("Something went wrong when submitting the form");
-            toast.error("Failed to process your request");
+            setError(err.response?.data?.message || "Something went wrong when submitting the form");
+            toast.error(err.response?.data?.message || "Failed to process your request");
         } finally {
             setIsSubmitting(false);
         }
@@ -99,26 +116,38 @@ const SubjectForm = ({
 
                 <InputField
                     label="Mã môn học"
-                    name="subjectId"
-                    defaultValue={data?.subjectId}
+                    name="code"
+                    defaultValue={type === 'update' ? String(data?.id) : data?.code}
                     register={register}
-                    error={errors?.id}
+                    error={errors?.code}
+                />
+
+                <InputField
+                    label="Mô tả"
+                    name="description"
+                    defaultValue={data?.description}
+                    register={register}
+                    error={errors?.description}
                 />
 
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Giáo viên</label>
-                    <select
-                        multiple
-                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                        {...register("teachers")}
-                        defaultValue={data?.teachers}
-                    >
-                        {teachers.map((teacher: Teacher) => (
-                            <option value={teacher.id} key={teacher.id}>
-                                {teacher.name}
-                            </option>
-                        ))}
-                    </select>
+                    {loadingTeachers ? (
+                        <div>Đang tải giáo viên...</div>
+                    ) : (
+                        <select
+                            multiple
+                            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                            {...register("teachers")}
+                            defaultValue={data?.teachers}
+                        >
+                            {teachersList.map((teacher) => (
+                                <option value={teacher.id} key={teacher.id}>
+                                    {teacher.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                     {errors.teachers?.message && (
                         <p className="text-xs text-red-400">
                             {errors.teachers.message.toString()}

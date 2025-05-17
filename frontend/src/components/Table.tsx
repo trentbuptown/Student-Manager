@@ -5,7 +5,7 @@ const Table = ({
 }: {
     columns: { header: string; accessor: string; className?: string }[];
     renderRow: (item: any) => React.ReactNode;
-    data: any[];
+    data: any[]; // Although we expect array, we'll handle undefined/null inside
 }) => {
     return (
         <table className="w-full mt-4">
@@ -18,7 +18,9 @@ const Table = ({
                     ))}
                 </tr>
             </thead>
-            <tbody>{data.map((item) => renderRow(item))}</tbody>
+            <tbody>
+                {(data || []).map((item) => renderRow(item))}
+            </tbody>
         </table>
     );
 };
