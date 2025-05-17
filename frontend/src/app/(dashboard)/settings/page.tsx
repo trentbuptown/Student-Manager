@@ -4,30 +4,6 @@ import { useState } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { toast } from 'react-hot-toast';
 
-// Dữ liệu mẫu cho settings
-const initialSettings = {
-    notifications: {
-        email: true,
-        browser: true,
-        mobile: false,
-    },
-    privacy: {
-        showProfile: 'everyone', // everyone, schoolOnly, none
-        showEmail: 'schoolOnly',
-        showPhone: 'none',
-    },
-    appearance: {
-        theme: 'light', // light, dark, system
-        fontSize: 'medium', // small, medium, large
-        language: 'vi', // vi, en
-    },
-    system: {
-        autoSave: true,
-        sessionTimeout: '30', // minutes
-        pageSize: '10', // items per page
-    }
-};
-
 export default function Settings() {
     const { settings, updateSettings, saveSettings } = useSettings();
     const [isSaving, setIsSaving] = useState(false);
@@ -206,14 +182,14 @@ export default function Settings() {
                                 onChange={(e) => handleSettingChange('appearance', 'language', e.target.value)}
                             >
                                 <option value="vi">Tiếng Việt</option>
-                                <option value="en">English</option>
+                                <option value="en">Tiếng Anh</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 {/* System Settings */}
-                <div className="p-6 border-b border-gray-200">
+                <div className="p-6">
                     <h2 className="text-lg font-medium text-gray-900 mb-4">Hệ thống</h2>
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -234,7 +210,7 @@ export default function Settings() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-900 mb-1">
-                                Thời gian chờ phiên làm việc (phút)
+                                Thời gian hết phiên (phút)
                             </label>
                             <select
                                 className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a42bf]"
@@ -244,36 +220,38 @@ export default function Settings() {
                                 <option value="15">15 phút</option>
                                 <option value="30">30 phút</option>
                                 <option value="60">60 phút</option>
+                                <option value="120">120 phút</option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-900 mb-1">
-                                Số mục hiển thị mỗi trang
+                                Số mục trên mỗi trang
                             </label>
                             <select
                                 className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a42bf]"
                                 value={settings.system.pageSize}
                                 onChange={(e) => handleSettingChange('system', 'pageSize', e.target.value)}
                             >
-                                <option value="10">10 mục</option>
-                                <option value="20">20 mục</option>
-                                <option value="50">50 mục</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
                             </select>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Actions */}
-                <div className="p-6 flex justify-end">
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="px-4 py-2 bg-[#1a42bf] text-white rounded-lg hover:bg-[#153288] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isSaving ? 'Đang lưu...' : 'Lưu cài đặt'}
-                    </button>
-                </div>
+            {/* Save Button */}
+            <div className="mt-6 flex justify-end">
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="px-4 py-2 bg-[#1a42bf] text-white rounded-lg hover:bg-[#143296] focus:outline-none focus:ring-2 focus:ring-[#e5eaff] disabled:opacity-50"
+                >
+                    {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
             </div>
         </div>
     );
