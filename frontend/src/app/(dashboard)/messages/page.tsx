@@ -1,49 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import RegulationModal from '@/components/modals/RegulationModal';
-
-// Dữ liệu mẫu cho các quy định
-const initialRegulations = [
-    {
-        id: 1,
-        title: 'Quy định về đồng phục học sinh',
-        content: 'Học sinh phải mặc đồng phục đúng quy định của nhà trường, áo sơ mi trắng, quần/váy xanh đậm, đi giày hoặc dép có quai hậu.',
-        lastUpdated: '2 phút trước',
-    },
-    {
-        id: 2,
-        title: 'Quy định về giờ học',
-        content: 'Học sinh phải có mặt tại trường trước 7h00 sáng. Các tiết học bắt đầu đúng giờ, học sinh đi trễ phải có giấy phép của giáo viên chủ nhiệm.',
-        lastUpdated: '15 phút trước',
-    },
-    {
-        id: 3,
-        title: 'Quy định về ứng xử',
-        content: 'Học sinh phải có thái độ tôn trọng với thầy cô, nhân viên nhà trường và các bạn học sinh khác. Không được nói tục, chửi thề, gây gổ đánh nhau.',
-        lastUpdated: '1 giờ trước',
-    },
-    {
-        id: 4,
-        title: 'Quy định về vệ sinh',
-        content: 'Học sinh có trách nhiệm giữ gìn vệ sinh chung, bỏ rác đúng nơi quy định, không viết, vẽ lên bàn ghế, tường nhà trường.',
-        lastUpdated: '2 giờ trước',
-    },
-    {
-        id: 5,
-        title: 'Quy định về điện thoại',
-        content: 'Học sinh không được sử dụng điện thoại di động trong giờ học. Điện thoại phải tắt nguồn và cất trong cặp.',
-        lastUpdated: '3 giờ trước',
-    }
-];
+import { ruleService, Rule } from '@/services/ruleService';
+import { toast } from 'react-hot-toast';
 
 export default function Messages() {
     const [searchTerm, setSearchTerm] = useState('');
-    const [regulations, setRegulations] = useState(initialRegulations);
+    const [regulations, setRegulations] = useState<Rule[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingRegulation, setEditingRegulation] = useState<any>(null);
+    const [editingRegulation, setEditingRegulation] = useState<Rule | null>(null);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch regulations when component mounts
+    useEffect(() => {
+        fetchRegulations();
+    }, []);
+
+    const fetchRegulations = async () => {
+        try {
+            const data = await ruleService.getAll();
+            setRegulations(data);
+        } catch (error) {
+            toast.error('Không thể tải danh sách quy định');
+            console.error('Error fetching regulations:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const filteredRegulations = regulations.filter(reg =>
         reg.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,34 +42,53 @@ export default function Messages() {
         setIsModalOpen(true);
     };
 
-    const handleEditRegulation = (regulation: any) => {
+    const handleEditRegulation = (regulation: Rule) => {
         setModalMode('edit');
         setEditingRegulation(regulation);
         setIsModalOpen(true);
     };
 
-    const handleDeleteRegulation = (id: number) => {
+    const handleDeleteRegulation = async (id: number) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa quy định này?')) {
-            setRegulations(regulations.filter(reg => reg.id !== id));
+            try {
+                await ruleService.delete(id);
+                setRegulations(regulations.filter(reg => reg.id !== id));
+                toast.success('Xóa quy định thành công');
+            } catch (error) {
+                toast.error('Không thể xóa quy định');
+                console.error('Error deleting regulation:', error);
+            }
         }
     };
 
-    const handleModalSubmit = (data: any) => {
-        if (modalMode === 'add') {
-            const newRegulation = {
-                id: regulations.length + 1,
-                ...data,
-                lastUpdated: 'Vừa xong',
-            };
-            setRegulations([...regulations, newRegulation]);
-        } else {
-            setRegulations(regulations.map(reg =>
-                reg.id === editingRegulation.id
-                    ? { ...reg, ...data, lastUpdated: 'Vừa cập nhật' }
-                    : reg
-            ));
+    const handleModalSubmit = async (data: { title: string; content: string }) => {
+        try {
+            if (modalMode === 'add') {
+                // TODO: Lấy admin_id từ context hoặc state
+                const admin_id = 1; // Tạm thời hardcode
+                const newRegulation = await ruleService.create({ ...data, admin_id });
+                setRegulations([...regulations, newRegulation]);
+                toast.success('Thêm quy định thành công');
+            } else if (editingRegulation) {
+                const updatedRegulation = await ruleService.update(editingRegulation.id, data);
+                setRegulations(regulations.map(reg =>
+                    reg.id === editingRegulation.id ? updatedRegulation : reg
+                ));
+                toast.success('Cập nhật quy định thành công');
+            }
+        } catch (error) {
+            toast.error(modalMode === 'add' ? 'Không thể thêm quy định' : 'Không thể cập nhật quy định');
+            console.error('Error submitting regulation:', error);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="p-6 flex justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1a42bf]"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6">
@@ -126,20 +131,22 @@ export default function Messages() {
                             <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => handleEditRegulation(reg)}
-                                    className="text-gray-400 hover:text-[#1a42bf]"
+                                    className="p-1 rounded-md bg-blue-300 hover:bg-blue-5000"
                                 >
-                                    Sửa
+                                    <Image src="/update.png" alt="Sửa" width={20} height={20} />
                                 </button>
                                 <button
                                     onClick={() => handleDeleteRegulation(reg.id)}
-                                    className="text-gray-400 hover:text-red-600"
+                                    className="p-1 rounded-md bg-red-300 hover:bg-red-500"
                                 >
-                                    Xóa
+                                    <Image src="/delete.png" alt="Xóa" width={20} height={20} />
                                 </button>
                             </div>
                         </div>
                         <p className="text-gray-500 text-sm">{reg.content}</p>
-                        <div className="text-xs text-gray-400 mt-2">{reg.lastUpdated}</div>
+                        <div className="text-xs text-gray-400 mt-2">
+                            Cập nhật lần cuối: {new Date(reg.updated_at).toLocaleString('vi-VN')}
+                        </div>
                     </div>
                 ))}
             </div>
