@@ -3,7 +3,9 @@ import { date, z } from "zod";
 export const subjectSchema = z.object({
     id: z.coerce.number().optional(),
     name: z.string().min(1, { message: "Vui lòng nhập tên môn học." }),
-    teachers: z.array(z.string()), //teacher ids
+    code: z.string().min(1, { message: "Vui lòng nhập mã môn học." }),
+    description: z.string().optional(),
+    teachers: z.array(z.string()).optional(), //teacher ids - Made optional as it might not be required for create/update
 });
 
 export type SubjectSchema = z.infer<typeof subjectSchema>;

@@ -5,15 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 
 class SubjectController extends Controller
 {
+    // use HasFactory; // Assuming this trait is used in the base Controller or removed if not needed
+
     /**
      * Hiển thị danh sách môn học
      */
     public function index()
     {
-        $subjects = Subject::all();
+        // Eager load the related teachers. Remove explicit select of non-existent columns.
+        $subjects = Subject::with('teachers')->get();
         return response()->json($subjects);
     }
 
