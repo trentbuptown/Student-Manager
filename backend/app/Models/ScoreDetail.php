@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Grade extends Model
+class ScoreDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'grades';
-
     protected $fillable = [
-        'name',
+        'score_id',
+        'type',
+        'score'
     ];
 
-    public function classes()
+    public function score()
     {
-        return $this->hasMany(Classes::class);
+        return $this->belongsTo(Score::class);
     }
 } 

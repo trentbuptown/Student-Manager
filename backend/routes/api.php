@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ScoreDetailController;
+use App\Http\Controllers\GradeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::post('/register', [AuthController::class, 'registerUser']);
     });
+
+    Route::apiResource('score-details', ScoreDetailController::class);
+    Route::apiResource('grades', GradeController::class);
 });
