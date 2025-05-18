@@ -106,22 +106,36 @@ export const logout = async (): Promise<void> => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
+                // Thử gọi API logout, nhưng xử lý các lỗi có thể xảy ra
+                console.log('Đang gọi API đăng xuất...');
                 await axiosClient.post('/logout');
                 console.log('Đăng xuất API thành công');
-            } catch (error) {
-                console.error('Lỗi khi gọi API đăng xuất:', error);
+            } catch (error: any) {
+                // Không cần throw lỗi - chỉ ghi log lỗi
+                if (error.response?.status === 401) {
+                    console.log('Lỗi 401 khi đăng xuất: Phiên đã hết hạn hoặc token không hợp lệ');
+                } else {
+                    console.log('Lỗi khi gọi API đăng xuất, vẫn tiếp tục quá trình đăng xuất local');
+                    console.error('Chi tiết lỗi:', error);
+                }
             }
+        } else {
+            console.log('Không có token để đăng xuất qua API');
         }
     } finally {
-        // Luôn xóa token và user khỏi localStorage, ngay cả khi API call thất bại
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        
-        // Xóa cookie auth_token và user_role
-        deleteCookie('auth_token');
-        deleteCookie('user_role');
-        
-        console.log('Đã xóa token và thông tin người dùng khỏi localStorage và cookie');
+        try {
+            // Luôn xóa token và user khỏi localStorage, ngay cả khi API call thất bại
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Xóa cookie auth_token và user_role
+            deleteCookie('auth_token');
+            deleteCookie('user_role');
+            
+            console.log('Đã xóa token và thông tin người dùng khỏi localStorage và cookie');
+        } catch (e) {
+            console.error('Lỗi khi xóa dữ liệu đăng nhập local:', e);
+        }
     }
 };
 
@@ -165,5 +179,7 @@ export const isStudent = (): boolean => {
 
 export const isAdmin = (): boolean => {
     const user = getCurrentUser();
+    console.log("Checking admin permission, user:", user);
+    console.log("Has admin:", user && user.admin !== undefined && user.admin !== null);
     return user && user.admin !== undefined && user.admin !== null;
 }; 

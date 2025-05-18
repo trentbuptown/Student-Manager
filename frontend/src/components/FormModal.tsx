@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { JSX, useState } from "react";
 import subjectService from '@/services/subjectService';
+import { deleteClass } from '@/services/classService';
 import { toast } from 'sonner';
 
 const TeacherForm = dynamic(() => import("./forms/TeacherForm"), {
@@ -49,7 +50,7 @@ const forms: {
         <SubjectForm type={type} data={data} onSuccess={onSuccess} />
     ),
     report: (type, data, onSuccess) => (
-        <ReportForm type={type} data={data} onSuccess={onSuccess} />
+        <ReportForm type={type} data={data} />
     ),
 };
 
@@ -72,7 +73,6 @@ const FormModal = ({
         | "lesson"
         | "result"
         | "event"
-        | "parent"
         | "exam"
         | "report";
 
@@ -92,9 +92,22 @@ const FormModal = ({
     const [open, setOpen] = useState(false);
 
     const handleSuccess = () => {
+        console.log('FormModal: handleSuccess called');
         setOpen(false);
         if (onSuccess) {
+            console.log('FormModal: Calling parent onSuccess');
             onSuccess();
+        } else {
+            console.log('FormModal: No parent onSuccess function provided');
+            // Nếu không có onSuccess, tải lại trang sau khi xóa hoặc cập nhật
+            if (type === 'delete') {
+                console.log('FormModal: Reloading page after deletion');
+                // Chờ 1 giây trước khi tải lại trang để hiển thị thông báo thành công
+                setTimeout(() => window.location.reload(), 1000);
+            } else if (table === 'subject') {
+                console.log('FormModal: Reloading page for subject updates');
+                window.location.reload();
+            }
         }
     };
 
@@ -102,56 +115,120 @@ const FormModal = ({
         const handleDeleteConfirm = async () => {
             if (id === undefined) {
                 console.error("Delete action requires an ID.");
-                toast.error('Không thể xóa: Thiếu ID môn học.');
+                toast.error(`Không thể xóa: Thiếu ID ${table}.`);
                 return;
             }
             try {
-                await subjectService.delete(id);
-                toast.success('Xóa môn học thành công.');
+                console.log(`===== DELETING ${table.toUpperCase()} WITH ID: ${id} =====`);
+                
+                let response;
+                
+                // Sử dụng service tương ứng với table
+                if (table === 'subject') {
+                    console.log(`Making DELETE request to /subjects/${id}`);
+                    response = await subjectService.delete(id);
+                } else if (table === 'class') {
+                    console.log(`Making DELETE request to /classes/${id}`);
+                    try {
+                        await deleteClass(id);
+                        response = { message: 'Đã xóa lớp học thành công' };
+                    } catch (error: any) {
+                        // Bỏ qua lỗi 404 vì có thể lớp học đã bị xóa trước đó
+                        if (error.response && error.response.status === 404) {
+                            console.log('Lớp học không tồn tại hoặc đã bị xóa trước đó');
+                            response = { message: 'Lớp học đã được xóa' };
+                        } else {
+                            throw error; // Ném lại các lỗi khác
+                        }
+                    }
+                } else {
+                    // Các table khác chưa được hỗ trợ
+                    toast.error(`Chưa hỗ trợ xóa ${table}`);
+                    return;
+                }
+                
+                console.log('Delete response:', response);
+                toast.success(`Xóa ${table} thành công.`);
                 handleSuccess();
-            } catch (error) {
-                console.error('Error deleting subject:', error);
-                toast.error('Không thể xóa môn học. Vui lòng thử lại.');
+            } catch (error: any) {
+                console.error('Error deleting:', error);
+                
+                // Hiển thị thông báo lỗi chi tiết từ API response
+                let errorMessage = 'Lỗi không xác định';
+                
+                if (error.response) {
+                    console.log('Error response data:', error.response.data);
+                    
+                    // Trường hợp có message trong response data
+                    if (error.response.data?.message) {
+                        errorMessage = error.response.data.message;
+                    } 
+                    // Trường hợp error status là 422 và không có message cụ thể
+                    else if (error.response.status === 422) {
+                        if (table === 'class') {
+                            errorMessage = 'Không thể xóa lớp học này vì đang có học sinh trong lớp';
+                        } else {
+                            errorMessage = 'Dữ liệu không hợp lệ';
+                        }
+                    }
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                toast.error(`Không thể xóa: ${errorMessage}`);
             }
         };
 
-        return type === "delete" && id ? (
-            <form
-                action=""
-                className="p-4 gap-4 flex flex-col items-center justify-center"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    handleDeleteConfirm();
-                }}
-            >
-                <Image src="/warning.png" alt="" width={150} height={150} />
-                <span className="text-center font-semibold text-2xl uppercase">
-                    Bạn có chắc chắn muốn xóa?
-                </span>
-                <span className="text-center font-medium text-lg text-gray-500">
-                    Dữ liệu sẽ không thể được khôi phục.
-                </span>
-                <div className="flex gap-8 mt-8">
-                    <button
-                        className="bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
-                        onClick={() => setOpen(false)}
-                        type="button"
-                    >
-                        Hủy
-                    </button>
-                    <button
-                        className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
-                        type="submit"
-                    >
-                        Xóa
-                    </button>
-                </div>
-            </form>
-        ) : type === "create" || type === "update" ? (
-            forms[table](type, data, handleSuccess)
-        ) : (
-            "Form not found!"
-        );
+        if (type === "delete" && id) {
+            return (
+                <form
+                    action=""
+                    className="p-4 gap-4 flex flex-col items-center justify-center"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleDeleteConfirm();
+                    }}
+                >
+                    <Image src="/warning.png" alt="" width={150} height={150} />
+                    <span className="text-center font-semibold text-2xl uppercase">
+                        Bạn có chắc chắn muốn xóa?
+                    </span>
+                    <span className="text-center font-medium text-lg text-gray-500">
+                        Dữ liệu sẽ không thể được khôi phục.
+                    </span>
+                    <div className="flex gap-8 mt-8">
+                        <button
+                            className="bg-gray-400 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
+                            onClick={() => setOpen(false)}
+                            type="button"
+                        >
+                            Hủy
+                        </button>
+                        <button
+                            className="bg-red-600 text-white py-2 px-4 rounded-md border-none w-max self-center font-semibold hover:shadow-lg hover:-translate-y-1 transform transition duration-300"
+                            type="submit"
+                        >
+                            Xóa
+                        </button>
+                    </div>
+                </form>
+            );
+        }
+        
+        if (type === "create" || type === "update") {
+            console.log(`Rendering form for table: ${table}, type: ${type}`);
+            console.log('Form data:', data);
+            console.log('onSuccess function provided:', !!onSuccess);
+            
+            // Đặc biệt xử lý cho subjectForm
+            if (table === 'subject') {
+                console.log('Rendering SubjectForm with:', { type, data, onSuccess: !!onSuccess });
+            }
+            
+            return forms[table](type, data, handleSuccess);
+        }
+        
+        return "Form not found!";
     };
     return (
         <>

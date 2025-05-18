@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
+use App\Models\TeacherSubject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -35,8 +36,24 @@ class SubjectController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $subject = Subject::create($request->all());
-        return response()->json($subject, 201);
+        // Tạo môn học mới
+        $subject = Subject::create([
+            'name' => $request->name
+        ]);
+
+        // Xử lý thêm giáo viên vào môn học
+        if ($request->has('teachers') && is_array($request->teachers)) {
+            foreach ($request->teachers as $teacher) {
+                if (isset($teacher['id'])) {
+                    TeacherSubject::create([
+                        'teacher_id' => $teacher['id'],
+                        'subject_id' => $subject->id
+                    ]);
+                }
+            }
+        }
+
+        return response()->json($subject->load('teachers'), 201);
     }
 
     /**
@@ -44,7 +61,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        return response()->json($subject);
+        return response()->json($subject->load('teachers'));
     }
 
     /**
@@ -60,8 +77,28 @@ class SubjectController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $subject->update($request->all());
-        return response()->json($subject);
+        // Cập nhật thông tin môn học
+        $subject->update([
+            'name' => $request->name
+        ]);
+
+        // Xử lý cập nhật giáo viên cho môn học
+        if ($request->has('teachers') && is_array($request->teachers)) {
+            // Xóa tất cả các bản ghi liên kết cũ
+            TeacherSubject::where('subject_id', $subject->id)->delete();
+            
+            // Thêm các bản ghi mới
+            foreach ($request->teachers as $teacher) {
+                if (isset($teacher['id'])) {
+                    TeacherSubject::create([
+                        'teacher_id' => $teacher['id'],
+                        'subject_id' => $subject->id
+                    ]);
+                }
+            }
+        }
+
+        return response()->json($subject->load('teachers'));
     }
 
     /**
@@ -69,6 +106,9 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
+        // Xóa tất cả các bản ghi liên kết trước
+        TeacherSubject::where('subject_id', $subject->id)->delete();
+        
         $subject->delete();
         return response()->json(null, 204);
     }

@@ -10,6 +10,8 @@ use App\Http\Controllers\TeacherSubjectController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ReportController;
 
 
 Route::get('/user', function (Request $request) {
@@ -42,10 +44,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('classes', ClassController::class);
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('subjects', SubjectController::class);
+    Route::apiResource('students', StudentController::class);
 
     // Teacher Subject Routes
     Route::apiResource('teacher-subjects', TeacherSubjectController::class);
 
     // Score Routes
     Route::apiResource('scores', ScoreController::class);
+    
+    // Báo cáo và thống kê
+    Route::get('/reports/student/{student_id}', [ScoreController::class, 'getStudentReport']);
+    Route::get('/reports/class/{class_id}', [ScoreController::class, 'getClassReport']);
+    Route::get('/reports/subject/{subject_id}', [ScoreController::class, 'getSubjectReport']);
 });

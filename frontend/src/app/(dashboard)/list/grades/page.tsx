@@ -185,55 +185,60 @@ const ClassManagementPage = () => {
         </tr>
     );
 
-    const renderGradeRow = (item: Grade) => (
-        <tr
-            key={item.id}
-            className="border-b border-gray-200 text-sm even:bg-slate-50 hover:bg-[var(--light-blue)]"
-        >
-            <td className="flex items-center gap-4 p-4">
-                <button
-                    onClick={() => {
-                        setSelectedGrade(item.id);
-                        setActiveTab("classes");
-                    }}
-                    className="text-blue-500 hover:text-blue-700 hover:underline"
-                >
-                    {item.name}
-                </button>
-            </td>
-            <td>{item.classes_count || 0}</td>
-            <td>
-                <div className="flex items-center gap-2">
+    const renderGradeRow = (item: Grade) => {
+        // Đếm số lớp thuộc khối này
+        const classCount = classes.filter(c => c.grade_id === item.id).length;
+        
+        return (
+            <tr
+                key={item.id}
+                className="border-b border-gray-200 text-sm even:bg-slate-50 hover:bg-[var(--light-blue)]"
+            >
+                <td className="flex items-center gap-4 p-4">
                     <button
-                        className="w-7 h-7 bg-[var(--blue-pastel)] flex items-center justify-center rounded-full cursor-pointer"
                         onClick={() => {
-                            document
-                                .getElementById(`updateGradeModal-${item.id}`)
-                                ?.classList.remove("hidden");
+                            setSelectedGrade(item.id);
+                            setActiveTab("classes");
                         }}
+                        className="text-blue-500 hover:text-blue-700 hover:underline"
                     >
-                        <Image
-                            src="/update.png"
-                            alt="Cập nhật"
-                            width={16}
-                            height={16}
-                        />
+                        {item.name}
                     </button>
-                    <button
-                        className="w-7 h-7 bg-[var(--purple-pastel)] flex items-center justify-center rounded-full cursor-pointer"
-                        onClick={() => handleDeleteGrade(item.id)}
-                    >
-                        <Image
-                            src="/delete.png"
-                            alt="Xóa"
-                            width={16}
-                            height={16}
-                        />
-                    </button>
-                </div>
-            </td>
-        </tr>
-    );
+                </td>
+                <td>{classCount} lớp</td>
+                <td>
+                    <div className="flex items-center gap-2">
+                        <button
+                            className="w-7 h-7 bg-[var(--blue-pastel)] flex items-center justify-center rounded-full cursor-pointer"
+                            onClick={() => {
+                                document
+                                    .getElementById(`updateGradeModal-${item.id}`)
+                                    ?.classList.remove("hidden");
+                            }}
+                        >
+                            <Image
+                                src="/update.png"
+                                alt="Cập nhật"
+                                width={16}
+                                height={16}
+                            />
+                        </button>
+                        <button
+                            className="w-7 h-7 bg-[var(--purple-pastel)] flex items-center justify-center rounded-full cursor-pointer"
+                            onClick={() => handleDeleteGrade(item.id)}
+                        >
+                            <Image
+                                src="/delete.png"
+                                alt="Xóa"
+                                width={16}
+                                height={16}
+                            />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        );
+    };
 
     return (
         <div className="p-4 flex-1 m-4 mt-0 bg-white rounded-md">
