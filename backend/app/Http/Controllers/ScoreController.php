@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
-use App\Models\ClassModel;
+use App\Models\Classes;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ScoreController extends Controller
 {
@@ -17,54 +17,78 @@ class ScoreController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Score::with(['student', 'subject', 'scoreDetails']);
-        
-        // Lọc theo student_id nếu được cung cấp
+        // Khởi tạo query builder
+        $query = Score::with(['student', 'subject', 'teacher', 'class']);
+
+        // Áp dụng các bộ lọc nếu có
         if ($request->has('student_id')) {
             $query->where('student_id', $request->student_id);
         }
         
-        // Lọc theo subject_id nếu được cung cấp
         if ($request->has('subject_id')) {
             $query->where('subject_id', $request->subject_id);
         }
         
+        if ($request->has('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+        
+        if ($request->has('class_id')) {
+            $query->where('class_id', $request->class_id);
+        }
+        
+        if ($request->has('semester')) {
+            $query->where('semester', $request->semester);
+        }
+        
+        if ($request->has('school_year')) {
+            $query->where('school_year', $request->school_year);
+        }
+        
+        if ($request->has('score_type')) {
+            $query->where('score_type', $request->score_type);
+        }
+
+        // Lấy kết quả
         $scores = $query->get();
         
-        // Bổ sung thông tin chi tiết
+        // Định dạng lại dữ liệu để phù hợp với frontend
         $formattedScores = $scores->map(function ($score) {
             return [
                 'id' => $score->id,
-                'student' => [
-                    'id' => $score->student->id,
-                    'name' => $score->student->name,
-                    'student_code' => $score->student->student_code ?? null,
-                ],
-                'subject' => [
-                    'id' => $score->subject->id,
-                    'name' => $score->subject->name,
-                    'subject_code' => $score->subject->subject_code ?? null,
-                ],
-                'score_details' => $score->scoreDetails->map(function ($detail) {
-                    return [
-                        'id' => $detail->id,
-                        'type' => $detail->type,
-                        'score' => $detail->score,
-                        'type_text' => $this->getScoreTypeText($detail->type),
-                    ];
-                }),
-                'average_score' => $score->average_score,
-                'classification' => $score->classification,
-                'pass_status' => $score->pass_status,
+                'student_id' => $score->student_id,
+                'subject_id' => $score->subject_id,
+                'teacher_id' => $score->teacher_id, 
+                'class_id' => $score->class_id,
+                'score_value' => $score->score_value,
+                'score_type' => $score->score_type,
+                'semester' => $score->semester,
+                'school_year' => $score->school_year,
                 'created_at' => $score->created_at,
                 'updated_at' => $score->updated_at,
+                'student' => $score->student ? [
+                    'id' => $score->student->id,
+                    'name' => $score->student->name,
+                    'code' => $score->student->code ?? ''
+                ] : null,
+                'subject' => $score->subject ? [
+                    'id' => $score->subject->id,
+                    'name' => $score->subject->name,
+                    'code' => $score->subject->code ?? ''
+                ] : null,
+                'teacher' => $score->teacher ? [
+                    'id' => $score->teacher->id,
+                    'name' => $score->teacher->name
+                ] : null,
+                'class' => $score->class ? [
+                    'id' => $score->class->id,
+                    'name' => $score->class->name
+                ] : null,
+                'original' => [] // Thêm trường original trống để tránh lỗi
             ];
         });
         
-        return response()->json([
-            'status' => 'success',
-            'data' => $formattedScores,
-        ]);
+        return response()->json($formattedScores);
     }
 
     /**
@@ -75,46 +99,66 @@ class ScoreController extends Controller
         $validator = Validator::make($request->all(), [
             'student_id' => 'required|exists:students,id',
             'subject_id' => 'required|exists:subjects,id',
-            'score_details' => 'required|array',
-            'score_details.*.type' => 'required|string|in:mieng,15_phut,1_tiet,giua_ky,cuoi_ky',
-            'score_details.*.score' => 'required|numeric|min:0|max:10'
+            'teacher_id' => 'required|exists:teachers,id',
+            'class_id' => 'required|exists:classes,id',
+            'score_value' => 'required|numeric|min:0|max:10',
+            'score_type' => 'required|string',
+            'semester' => 'required|integer|min:1|max:2',
+            'school_year' => 'required|string'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
-        }
-
-        // Kiểm tra xem bản ghi điểm đã tồn tại cho học sinh và môn học này chưa
-        $existingScore = Score::where('student_id', $request->student_id)
-            ->where('subject_id', $request->subject_id)
-            ->first();
-            
-        if ($existingScore) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Điểm cho học sinh và môn học này đã tồn tại'
-            ], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         $score = Score::create([
             'student_id' => $request->student_id,
-            'subject_id' => $request->subject_id
+            'subject_id' => $request->subject_id,
+            'teacher_id' => $request->teacher_id,
+            'class_id' => $request->class_id,
+            'score_value' => $request->score_value,
+            'score_type' => $request->score_type,
+            'semester' => $request->semester,
+            'school_year' => $request->school_year
         ]);
 
-        foreach ($request->score_details as $detail) {
-            $score->scoreDetails()->create([
-                'type' => $detail['type'],
-                'score' => $detail['score']
-            ]);
-        }
-
-        $formattedScore = $this->formatScoreResponse($score->load(['student', 'subject', 'scoreDetails']));
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Điểm đã được tạo thành công',
-            'data' => $formattedScore
-        ], 201);
+        $score->load(['student', 'subject', 'teacher', 'class']);
+        
+        // Định dạng lại dữ liệu để phù hợp với frontend
+        $formattedScore = [
+            'id' => $score->id,
+            'student_id' => $score->student_id,
+            'subject_id' => $score->subject_id,
+            'teacher_id' => $score->teacher_id, 
+            'class_id' => $score->class_id,
+            'score_value' => $score->score_value,
+            'score_type' => $score->score_type,
+            'semester' => $score->semester,
+            'school_year' => $score->school_year,
+            'created_at' => $score->created_at,
+            'updated_at' => $score->updated_at,
+            'student' => $score->student ? [
+                'id' => $score->student->id,
+                'name' => $score->student->name,
+                'code' => $score->student->code ?? ''
+            ] : null,
+            'subject' => $score->subject ? [
+                'id' => $score->subject->id,
+                'name' => $score->subject->name,
+                'code' => $score->subject->code ?? ''
+            ] : null,
+            'teacher' => $score->teacher ? [
+                'id' => $score->teacher->id,
+                'name' => $score->teacher->name
+            ] : null,
+            'class' => $score->class ? [
+                'id' => $score->class->id,
+                'name' => $score->class->name
+            ] : null,
+            'original' => [] // Thêm trường original trống để tránh lỗi
+        ];
+        
+        return response()->json($formattedScore, 201);
     }
 
     /**
@@ -122,12 +166,43 @@ class ScoreController extends Controller
      */
     public function show(Score $score)
     {
-        $formattedScore = $this->formatScoreResponse($score->load(['student', 'subject', 'scoreDetails']));
+        $score->load(['student', 'subject', 'teacher', 'class']);
         
-        return response()->json([
-            'status' => 'success',
-            'data' => $formattedScore
-        ]);
+        // Định dạng lại dữ liệu để phù hợp với frontend
+        $formattedScore = [
+            'id' => $score->id,
+            'student_id' => $score->student_id,
+            'subject_id' => $score->subject_id,
+            'teacher_id' => $score->teacher_id, 
+            'class_id' => $score->class_id,
+            'score_value' => $score->score_value,
+            'score_type' => $score->score_type,
+            'semester' => $score->semester,
+            'school_year' => $score->school_year,
+            'created_at' => $score->created_at,
+            'updated_at' => $score->updated_at,
+            'student' => $score->student ? [
+                'id' => $score->student->id,
+                'name' => $score->student->name,
+                'code' => $score->student->code ?? ''
+            ] : null,
+            'subject' => $score->subject ? [
+                'id' => $score->subject->id,
+                'name' => $score->subject->name,
+                'code' => $score->subject->code ?? ''
+            ] : null,
+            'teacher' => $score->teacher ? [
+                'id' => $score->teacher->id,
+                'name' => $score->teacher->name
+            ] : null,
+            'class' => $score->class ? [
+                'id' => $score->class->id,
+                'name' => $score->class->name
+            ] : null,
+            'original' => [] // Thêm trường original trống để tránh lỗi
+        ];
+        
+        return response()->json($formattedScore);
     }
 
     /**
@@ -138,40 +213,83 @@ class ScoreController extends Controller
         $validator = Validator::make($request->all(), [
             'student_id' => 'exists:students,id',
             'subject_id' => 'exists:subjects,id',
-            'score_details' => 'array',
-            'score_details.*.type' => 'string|in:mieng,15_phut,1_tiet,giua_ky,cuoi_ky',
-            'score_details.*.score' => 'numeric|min:0|max:10'
+            'teacher_id' => 'exists:teachers,id',
+            'class_id' => 'exists:classes,id',
+            'score_value' => 'numeric|min:0|max:10',
+            'score_type' => 'string',
+            'semester' => 'integer|min:1|max:2',
+            'school_year' => 'string'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Cập nhật các trường nếu có trong request
         if ($request->has('student_id')) {
             $score->student_id = $request->student_id;
         }
         if ($request->has('subject_id')) {
             $score->subject_id = $request->subject_id;
         }
-        $score->save();
-
-        if ($request->has('score_details')) {
-            $score->scoreDetails()->delete();
-            foreach ($request->score_details as $detail) {
-                $score->scoreDetails()->create([
-                    'type' => $detail['type'],
-                    'score' => $detail['score']
-                ]);
-            }
+        if ($request->has('teacher_id')) {
+            $score->teacher_id = $request->teacher_id;
         }
-
-        $formattedScore = $this->formatScoreResponse($score->fresh()->load(['student', 'subject', 'scoreDetails']));
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Điểm đã được cập nhật thành công',
-            'data' => $formattedScore
-        ]);
+        if ($request->has('class_id')) {
+            $score->class_id = $request->class_id;
+        }
+        if ($request->has('score_value')) {
+            $score->score_value = $request->score_value;
+        }
+        if ($request->has('score_type')) {
+            $score->score_type = $request->score_type;
+        }
+        if ($request->has('semester')) {
+            $score->semester = $request->semester;
+        }
+        if ($request->has('school_year')) {
+            $score->school_year = $request->school_year;
+        }
+        
+        $score->save();
+        
+        $score->load(['student', 'subject', 'teacher', 'class']);
+        
+        // Định dạng lại dữ liệu để phù hợp với frontend
+        $formattedScore = [
+            'id' => $score->id,
+            'student_id' => $score->student_id,
+            'subject_id' => $score->subject_id,
+            'teacher_id' => $score->teacher_id, 
+            'class_id' => $score->class_id,
+            'score_value' => $score->score_value,
+            'score_type' => $score->score_type,
+            'semester' => $score->semester,
+            'school_year' => $score->school_year,
+            'created_at' => $score->created_at,
+            'updated_at' => $score->updated_at,
+            'student' => $score->student ? [
+                'id' => $score->student->id,
+                'name' => $score->student->name,
+                'code' => $score->student->code ?? ''
+            ] : null,
+            'subject' => $score->subject ? [
+                'id' => $score->subject->id,
+                'name' => $score->subject->name,
+                'code' => $score->subject->code ?? ''
+            ] : null,
+            'teacher' => $score->teacher ? [
+                'id' => $score->teacher->id,
+                'name' => $score->teacher->name
+            ] : null,
+            'class' => $score->class ? [
+                'id' => $score->class->id,
+                'name' => $score->class->name
+            ] : null,
+            'original' => [] // Thêm trường original trống để tránh lỗi
+        ];
+        
+        return response()->json($formattedScore);
     }
 
     /**
@@ -180,441 +298,427 @@ class ScoreController extends Controller
     public function destroy(Score $score)
     {
         $score->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Điểm đã được xóa thành công'
-        ], 200);
-    }
-    
-    /**
-     * Định dạng phản hồi điểm với dữ liệu được cấu trúc tốt
-     */
-    private function formatScoreResponse($score)
-    {
-        return [
-            'id' => $score->id,
-            'student' => [
-                'id' => $score->student->id,
-                'name' => $score->student->name,
-                'student_code' => $score->student->student_code ?? null,
-            ],
-            'subject' => [
-                'id' => $score->subject->id,
-                'name' => $score->subject->name,
-                'subject_code' => $score->subject->subject_code ?? null,
-            ],
-            'score_details' => $score->scoreDetails->map(function ($detail) {
-                return [
-                    'id' => $detail->id,
-                    'type' => $detail->type,
-                    'score' => $detail->score,
-                    'type_text' => $this->getScoreTypeText($detail->type),
-                ];
-            }),
-            'average_score' => $score->average_score,
-            'classification' => $score->classification,
-            'pass_status' => $score->pass_status,
-            'created_at' => $score->created_at,
-            'updated_at' => $score->updated_at,
-        ];
-    }
-    
-    /**
-     * Lấy văn bản mô tả cho loại điểm
-     */
-    private function getScoreTypeText($type)
-    {
-        $types = [
-            'mieng' => 'Điểm miệng',
-            '15_phut' => 'Điểm 15 phút',
-            '1_tiet' => 'Điểm 1 tiết',
-            'giua_ky' => 'Điểm giữa kỳ',
-            'cuoi_ky' => 'Điểm cuối kỳ',
-        ];
-        
-        return $types[$type] ?? $type;
+        return response()->json(null, 204);
     }
 
     /**
-     * Lấy báo cáo chi tiết về điểm của một học sinh
+     * Lấy danh sách năm học đã có điểm
      */
-    public function getStudentReport($student_id)
+    public function getSchoolYears()
     {
-        $student = Student::with('class')->findOrFail($student_id);
-        $scores = Score::with(['subject', 'scoreDetails'])
-                    ->where('student_id', $student_id)
-                    ->get();
-                    
-        $subjects = [];
-        $totalAverage = 0;
-        $totalSubjects = 0;
-        $passedSubjects = 0;
+        \Log::info('getSchoolYears method called');
         
-        foreach ($scores as $score) {
-            if ($score->average_score !== null) {
-                $totalAverage += $score->average_score;
-                $totalSubjects++;
-                
-                if ($score->pass_status === 'Đạt') {
-                    $passedSubjects++;
-                }
-                
-                $subjects[] = [
-                    'subject_id' => $score->subject->id,
-                    'subject_name' => $score->subject->name,
-                    'average_score' => $score->average_score,
-                    'classification' => $score->classification,
-                    'pass_status' => $score->pass_status,
-                    'details' => $score->scoreDetails->map(function($detail) {
-                        return [
-                            'type' => $detail->type,
-                            'type_text' => $this->getScoreTypeText($detail->type),
-                            'score' => $detail->score,
-                        ];
-                    }),
-                ];
+        $schoolYears = Score::select('school_year')
+            ->distinct()
+            ->whereNotNull('school_year')
+            ->orderBy('school_year', 'desc')
+            ->pluck('school_year')
+            ->toArray();
+        
+        \Log::info('Found school years: ' . json_encode($schoolYears));
+        
+        // Nếu không có dữ liệu thực tế, tạo danh sách năm học mặc định
+        if (empty($schoolYears)) {
+            $currentYear = date('Y');
+            for ($i = 0; $i < 5; $i++) {
+                $schoolYears[] = ($currentYear - $i - 1) . '-' . ($currentYear - $i);
             }
+            \Log::info('Generated default school years: ' . json_encode($schoolYears));
         }
         
-        $overallAverage = $totalSubjects > 0 ? round($totalAverage / $totalSubjects, 2) : null;
-        $passRate = $totalSubjects > 0 ? round(($passedSubjects / $totalSubjects) * 100, 2) : null;
+        return response()->json($schoolYears);
+    }
+
+    /**
+     * Tính điểm trung bình cho một học sinh theo môn học
+     */
+    public function calculateAverage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'semester' => 'required|integer|min:1|max:2',
+            'school_year' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $scores = Score::where('student_id', $request->student_id)
+            ->where('subject_id', $request->subject_id)
+            ->where('semester', $request->semester)
+            ->where('school_year', $request->school_year)
+            ->get();
         
-        // Xếp loại học lực tổng thể
-        $overallClassification = null;
-        if ($overallAverage !== null) {
-            if ($overallAverage >= 8.5) {
-                $overallClassification = 'Giỏi';
-            } elseif ($overallAverage >= 7.0) {
-                $overallClassification = 'Khá';
-            } elseif ($overallAverage >= 5.0) {
-                $overallClassification = 'Trung bình';
-            } elseif ($overallAverage >= 3.5) {
-                $overallClassification = 'Yếu';
-            } else {
-                $overallClassification = 'Kém';
+        if ($scores->isEmpty()) {
+            return response()->json(['average' => null, 'message' => 'Không có điểm nào']);
+        }
+
+        // Tạo mảng các loại điểm và hệ số
+        $scoreTypes = [
+            'oral' => ['weight' => 1, 'scores' => []],
+            'exercise' => ['weight' => 1, 'scores' => []],
+            'test15min' => ['weight' => 1, 'scores' => []],
+            'test45min' => ['weight' => 2, 'scores' => []],
+            'midterm' => ['weight' => 3, 'scores' => []],
+            'final' => ['weight' => 4, 'scores' => []]
+        ];
+
+        // Phân loại các điểm theo loại
+        foreach ($scores as $score) {
+            if (isset($scoreTypes[$score->score_type])) {
+                $scoreTypes[$score->score_type]['scores'][] = $score->score_value;
             }
+        }
+
+        // Tính tổng điểm có trọng số và tổng trọng số
+        $totalWeightedScore = 0;
+        $totalWeight = 0;
+
+        foreach ($scoreTypes as $type => $data) {
+            if (!empty($data['scores'])) {
+                // Tính điểm trung bình cho từng loại điểm
+                $typeAverage = array_sum($data['scores']) / count($data['scores']);
+                $totalWeightedScore += $typeAverage * $data['weight'];
+                $totalWeight += $data['weight'];
+            }
+        }
+
+        // Tính điểm trung bình cuối cùng
+        $average = ($totalWeight > 0) ? round($totalWeightedScore / $totalWeight, 2) : null;
+
+        return response()->json(['average' => $average]);
+    }
+
+    /**
+     * Nhập điểm hàng loạt
+     */
+    public function bulkCreate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'scores' => 'required|array',
+            'scores.*.student_id' => 'required|exists:students,id',
+            'scores.*.subject_id' => 'required|exists:subjects,id',
+            'scores.*.teacher_id' => 'required|exists:teachers,id',
+            'scores.*.class_id' => 'required|exists:classes,id',
+            'scores.*.score_value' => 'required|numeric|min:0|max:10',
+            'scores.*.score_type' => 'required|string',
+            'scores.*.semester' => 'required|integer|min:1|max:2',
+            'scores.*.school_year' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+        
+        try {
+            foreach ($request->scores as $scoreData) {
+                Score::create([
+                    'student_id' => $scoreData['student_id'],
+                    'subject_id' => $scoreData['subject_id'],
+                    'teacher_id' => $scoreData['teacher_id'],
+                    'class_id' => $scoreData['class_id'],
+                    'score_value' => $scoreData['score_value'],
+                    'score_type' => $scoreData['score_type'],
+                    'semester' => $scoreData['semester'],
+                    'school_year' => $scoreData['school_year']
+                ]);
+            }
+            
+            DB::commit();
+            return response()->json(['message' => 'Nhập điểm hàng loạt thành công'], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Lỗi khi nhập điểm hàng loạt', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Lấy báo cáo điểm của học sinh
+     */
+    public function getStudentReport(Request $request, $student_id)
+    {
+        $validator = Validator::make(['student_id' => $student_id] + $request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'semester' => 'integer|min:1|max:2',
+            'school_year' => 'string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Lấy thông tin học sinh
+        $student = Student::with('class')->findOrFail($student_id);
+        
+        // Khởi tạo query
+        $query = Score::where('student_id', $student_id)
+                      ->with(['subject']);
+        
+        // Lọc theo học kỳ nếu có
+        if ($request->has('semester')) {
+            $query->where('semester', $request->semester);
+        }
+        
+        // Lọc theo năm học nếu có
+        if ($request->has('school_year')) {
+            $query->where('school_year', $request->school_year);
+        }
+        
+        // Lấy tất cả điểm của học sinh
+        $scores = $query->get();
+        
+        // Nhóm điểm theo môn học
+        $subjectScores = [];
+        foreach ($scores as $score) {
+            $subjectId = $score->subject_id;
+            if (!isset($subjectScores[$subjectId])) {
+                $subjectScores[$subjectId] = [
+                    'subject' => $score->subject,
+                    'scores' => []
+                ];
+            }
+            $subjectScores[$subjectId]['scores'][] = [
+                'id' => $score->id,
+                'score_value' => $score->score_value,
+                'score_type' => $score->score_type,
+                'semester' => $score->semester,
+                'school_year' => $score->school_year,
+                'created_at' => $score->created_at
+            ];
+        }
+        
+        // Tính điểm trung bình cho từng môn học
+        foreach ($subjectScores as &$subjectData) {
+            $subjectData['average'] = $this->calculateSubjectAverage($subjectData['scores']);
         }
         
         return response()->json([
-            'status' => 'success',
-            'data' => [
-                'student' => [
-                    'id' => $student->id,
-                    'name' => $student->name,
-                    'student_code' => $student->student_code ?? null,
-                    'class' => $student->class ? [
-                        'id' => $student->class->id,
-                        'name' => $student->class->name,
-                    ] : null,
-                ],
-                'overall' => [
-                    'average_score' => $overallAverage,
-                    'classification' => $overallClassification,
-                    'total_subjects' => $totalSubjects,
-                    'passed_subjects' => $passedSubjects,
-                    'pass_rate' => $passRate,
-                ],
-                'subjects' => $subjects,
-            ]
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->name,
+                'code' => $student->code,
+                'class' => $student->class ? $student->class->name : null
+            ],
+            'subject_scores' => array_values($subjectScores)
         ]);
     }
-    
+
     /**
-     * Lấy báo cáo về điểm của một lớp học
+     * Lấy báo cáo điểm của lớp học
      */
-    public function getClassReport($class_id)
+    public function getClassReport(Request $request, $class_id)
     {
-        $class = ClassModel::findOrFail($class_id);
+        $validator = Validator::make(['class_id' => $class_id] + $request->all(), [
+            'class_id' => 'required|exists:classes,id',
+            'subject_id' => 'exists:subjects,id',
+            'semester' => 'integer|min:1|max:2',
+            'school_year' => 'string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Lấy thông tin lớp học
+        $class = Classes::findOrFail($class_id);
+        
+        // Lấy danh sách học sinh trong lớp
         $students = Student::where('class_id', $class_id)->get();
         
-        $studentReports = [];
-        $classTotalAverage = 0;
-        $classStudentsWithScores = 0;
-        $classExcellent = 0;
-        $classGood = 0;
-        $classAverage = 0;
-        $classBelow = 0;
+        $classReport = [
+            'class' => [
+                'id' => $class->id,
+                'name' => $class->name,
+                'grade' => $class->grade ? $class->grade->name : null
+            ],
+            'students' => []
+        ];
         
         foreach ($students as $student) {
-            $scores = Score::with(['subject', 'scoreDetails'])
-                    ->where('student_id', $student->id)
-                    ->get();
+            $query = Score::where('student_id', $student->id);
             
-            $studentTotalAverage = 0;
-            $studentTotalSubjects = 0;
-            $studentPassedSubjects = 0;
-            $subjects = [];
+            // Lọc theo môn học nếu có
+            if ($request->has('subject_id')) {
+                $query->where('subject_id', $request->subject_id);
+            }
             
+            // Lọc theo học kỳ nếu có
+            if ($request->has('semester')) {
+                $query->where('semester', $request->semester);
+            }
+            
+            // Lọc theo năm học nếu có
+            if ($request->has('school_year')) {
+                $query->where('school_year', $request->school_year);
+            }
+            
+            $scores = $query->with('subject')->get();
+            
+            // Nhóm điểm theo môn học
+            $subjectScores = [];
             foreach ($scores as $score) {
-                if ($score->average_score !== null) {
-                    $studentTotalAverage += $score->average_score;
-                    $studentTotalSubjects++;
-                    
-                    if ($score->pass_status === 'Đạt') {
-                        $studentPassedSubjects++;
-                    }
-                    
-                    $subjects[] = [
-                        'subject_id' => $score->subject->id,
-                        'subject_name' => $score->subject->name,
-                        'average_score' => $score->average_score,
-                        'classification' => $score->classification,
-                        'pass_status' => $score->pass_status
+                $subjectId = $score->subject_id;
+                if (!isset($subjectScores[$subjectId])) {
+                    $subjectScores[$subjectId] = [
+                        'subject' => $score->subject,
+                        'scores' => []
                     ];
                 }
-            }
-            
-            $studentAverage = $studentTotalSubjects > 0 ? round($studentTotalAverage / $studentTotalSubjects, 2) : null;
-            $studentPassRate = $studentTotalSubjects > 0 ? round(($studentPassedSubjects / $studentTotalSubjects) * 100, 2) : null;
-            
-            // Xếp loại học lực tổng thể của học sinh
-            $studentClassification = null;
-            if ($studentAverage !== null) {
-                if ($studentAverage >= 8.5) {
-                    $studentClassification = 'Giỏi';
-                    $classExcellent++;
-                } elseif ($studentAverage >= 7.0) {
-                    $studentClassification = 'Khá';
-                    $classGood++;
-                } elseif ($studentAverage >= 5.0) {
-                    $studentClassification = 'Trung bình';
-                    $classAverage++;
-                } else {
-                    $studentClassification = $studentAverage >= 3.5 ? 'Yếu' : 'Kém';
-                    $classBelow++;
-                }
-                
-                $classTotalAverage += $studentAverage;
-                $classStudentsWithScores++;
-            }
-            
-            if ($studentAverage !== null) {
-                $studentReports[] = [
-                    'student' => [
-                        'id' => $student->id,
-                        'name' => $student->name,
-                        'student_code' => $student->student_code ?? null,
-                    ],
-                    'average_score' => $studentAverage,
-                    'classification' => $studentClassification,
-                    'pass_rate' => $studentPassRate,
-                    'subject_count' => $studentTotalSubjects
+                $subjectScores[$subjectId]['scores'][] = [
+                    'id' => $score->id,
+                    'score_value' => $score->score_value,
+                    'score_type' => $score->score_type
                 ];
             }
+            
+            // Tính điểm trung bình cho từng môn học
+            foreach ($subjectScores as &$subjectData) {
+                $subjectData['average'] = $this->calculateSubjectAverage($subjectData['scores']);
+            }
+            
+            $classReport['students'][] = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'code' => $student->code,
+                'subject_scores' => array_values($subjectScores)
+            ];
         }
         
-        // Sắp xếp học sinh theo điểm trung bình từ cao xuống thấp
-        usort($studentReports, function($a, $b) {
-            return $b['average_score'] <=> $a['average_score'];
-        });
-        
-        // Tính điểm trung bình của lớp
-        $classAverageScore = $classStudentsWithScores > 0 ? round($classTotalAverage / $classStudentsWithScores, 2) : null;
-        
-        // Tính tỷ lệ phần trăm các loại học lực
-        $excellentRate = $classStudentsWithScores > 0 ? round(($classExcellent / $classStudentsWithScores) * 100, 2) : 0;
-        $goodRate = $classStudentsWithScores > 0 ? round(($classGood / $classStudentsWithScores) * 100, 2) : 0;
-        $averageRate = $classStudentsWithScores > 0 ? round(($classAverage / $classStudentsWithScores) * 100, 2) : 0;
-        $belowRate = $classStudentsWithScores > 0 ? round(($classBelow / $classStudentsWithScores) * 100, 2) : 0;
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'class' => [
-                    'id' => $class->id,
-                    'name' => $class->name,
-                    'grade_id' => $class->grade_id,
-                    'total_students' => $students->count(),
-                    'students_with_scores' => $classStudentsWithScores,
-                ],
-                'overall' => [
-                    'average_score' => $classAverageScore,
-                    'excellent' => [
-                        'count' => $classExcellent,
-                        'percentage' => $excellentRate,
-                    ],
-                    'good' => [
-                        'count' => $classGood,
-                        'percentage' => $goodRate,
-                    ],
-                    'average' => [
-                        'count' => $classAverage,
-                        'percentage' => $averageRate,
-                    ],
-                    'below_average' => [
-                        'count' => $classBelow,
-                        'percentage' => $belowRate,
-                    ],
-                ],
-                'students' => $studentReports,
-            ]
-        ]);
+        return response()->json($classReport);
     }
-    
+
     /**
-     * Lấy báo cáo về điểm của một môn học
+     * Lấy báo cáo điểm theo môn học
      */
-    public function getSubjectReport($subject_id)
+    public function getSubjectReport(Request $request, $subject_id)
     {
+        $validator = Validator::make(['subject_id' => $subject_id] + $request->all(), [
+            'subject_id' => 'required|exists:subjects,id',
+            'class_id' => 'exists:classes,id',
+            'semester' => 'integer|min:1|max:2',
+            'school_year' => 'string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Lấy thông tin môn học
         $subject = Subject::findOrFail($subject_id);
-        $scores = Score::with(['student.class', 'scoreDetails'])
-                ->where('subject_id', $subject_id)
-                ->get();
-                
+        
+        // Khởi tạo query
+        $query = Score::where('subject_id', $subject_id);
+        
+        // Lọc theo lớp học nếu có
+        if ($request->has('class_id')) {
+            $query->where('class_id', $request->class_id);
+            $class = Classes::find($request->class_id);
+        }
+        
+        // Lọc theo học kỳ nếu có
+        if ($request->has('semester')) {
+            $query->where('semester', $request->semester);
+        }
+        
+        // Lọc theo năm học nếu có
+        if ($request->has('school_year')) {
+            $query->where('school_year', $request->school_year);
+        }
+        
+        // Lấy tất cả điểm và nhóm theo học sinh
+        $scores = $query->with('student')->get();
+        
+        // Nhóm điểm theo học sinh
         $studentScores = [];
-        $totalAverage = 0;
-        $totalStudents = $scores->count();
-        $passedStudents = 0;
-        $excellent = 0;
-        $good = 0;
-        $average = 0;
-        $below = 0;
-        
-        // Nhóm theo lớp học
-        $classSummary = [];
-        
         foreach ($scores as $score) {
-            if ($score->average_score !== null) {
-                $totalAverage += $score->average_score;
-                
-                if ($score->pass_status === 'Đạt') {
-                    $passedStudents++;
-                }
-                
-                // Xếp loại
-                if ($score->average_score >= 8.5) {
-                    $excellent++;
-                } elseif ($score->average_score >= 7.0) {
-                    $good++;
-                } elseif ($score->average_score >= 5.0) {
-                    $average++;
-                } else {
-                    $below++;
-                }
-                
-                $studentScores[] = [
+            if (!$score->student) continue;
+            
+            $studentId = $score->student_id;
+            if (!isset($studentScores[$studentId])) {
+                $studentScores[$studentId] = [
                     'student' => [
                         'id' => $score->student->id,
                         'name' => $score->student->name,
-                        'student_code' => $score->student->student_code ?? null,
-                        'class' => $score->student->class ? [
-                            'id' => $score->student->class->id,
-                            'name' => $score->student->class->name,
-                        ] : null,
+                        'code' => $score->student->code
                     ],
-                    'average_score' => $score->average_score,
-                    'classification' => $score->classification,
-                    'pass_status' => $score->pass_status,
-                    'details' => $score->scoreDetails->map(function($detail) {
-                        return [
-                            'type' => $detail->type,
-                            'type_text' => $this->getScoreTypeText($detail->type),
-                            'score' => $detail->score,
-                        ];
-                    }),
+                    'scores' => []
                 ];
-                
-                // Thêm vào thống kê theo lớp
-                if ($score->student->class) {
-                    $classId = $score->student->class->id;
-                    $className = $score->student->class->name;
-                    
-                    if (!isset($classSummary[$classId])) {
-                        $classSummary[$classId] = [
-                            'class_id' => $classId,
-                            'class_name' => $className,
-                            'total_students' => 0,
-                            'passed_students' => 0,
-                            'average_score' => 0,
-                            'excellence_count' => 0,
-                            'good_count' => 0,
-                            'average_count' => 0,
-                            'below_count' => 0,
-                        ];
-                    }
-                    
-                    $classSummary[$classId]['total_students']++;
-                    $classSummary[$classId]['average_score'] += $score->average_score;
-                    
-                    if ($score->pass_status === 'Đạt') {
-                        $classSummary[$classId]['passed_students']++;
-                    }
-                    
-                    if ($score->average_score >= 8.5) {
-                        $classSummary[$classId]['excellence_count']++;
-                    } elseif ($score->average_score >= 7.0) {
-                        $classSummary[$classId]['good_count']++;
-                    } elseif ($score->average_score >= 5.0) {
-                        $classSummary[$classId]['average_count']++;
-                    } else {
-                        $classSummary[$classId]['below_count']++;
-                    }
-                }
+            }
+            
+            $studentScores[$studentId]['scores'][] = [
+                'id' => $score->id,
+                'score_value' => $score->score_value,
+                'score_type' => $score->score_type,
+                'semester' => $score->semester,
+                'school_year' => $score->school_year
+            ];
+        }
+        
+        // Tính điểm trung bình cho từng học sinh
+        foreach ($studentScores as &$studentData) {
+            $studentData['average'] = $this->calculateSubjectAverage($studentData['scores']);
+        }
+        
+        $report = [
+            'subject' => [
+                'id' => $subject->id,
+                'name' => $subject->name,
+                'code' => $subject->code
+            ],
+            'class' => isset($class) ? [
+                'id' => $class->id,
+                'name' => $class->name
+            ] : null,
+            'student_scores' => array_values($studentScores)
+        ];
+        
+        return response()->json($report);
+    }
+
+    /**
+     * Hàm tính điểm trung bình cho một môn học
+     */
+    private function calculateSubjectAverage($scores)
+    {
+        if (empty($scores)) {
+            return null;
+        }
+        
+        // Tạo mảng các loại điểm và hệ số
+        $scoreTypes = [
+            'oral' => ['weight' => 1, 'scores' => []],
+            'exercise' => ['weight' => 1, 'scores' => []],
+            'test15min' => ['weight' => 1, 'scores' => []],
+            'test45min' => ['weight' => 2, 'scores' => []],
+            'midterm' => ['weight' => 3, 'scores' => []],
+            'final' => ['weight' => 4, 'scores' => []]
+        ];
+        
+        // Phân loại các điểm theo loại
+        foreach ($scores as $score) {
+            if (isset($scoreTypes[$score['score_type']])) {
+                $scoreTypes[$score['score_type']]['scores'][] = $score['score_value'];
             }
         }
         
-        // Sắp xếp học sinh theo điểm từ cao xuống thấp
-        usort($studentScores, function($a, $b) {
-            return $b['average_score'] <=> $a['average_score'];
-        });
+        // Tính tổng điểm có trọng số và tổng trọng số
+        $totalWeightedScore = 0;
+        $totalWeight = 0;
         
-        // Tính trung bình cho mỗi lớp
-        foreach ($classSummary as $classId => $summary) {
-            if ($summary['total_students'] > 0) {
-                $classSummary[$classId]['average_score'] = round($summary['average_score'] / $summary['total_students'], 2);
-                $classSummary[$classId]['pass_rate'] = round(($summary['passed_students'] / $summary['total_students']) * 100, 2);
+        foreach ($scoreTypes as $type => $data) {
+            if (!empty($data['scores'])) {
+                // Tính điểm trung bình cho từng loại điểm
+                $typeAverage = array_sum($data['scores']) / count($data['scores']);
+                $totalWeightedScore += $typeAverage * $data['weight'];
+                $totalWeight += $data['weight'];
             }
         }
         
-        // Chuyển đổi mảng lớp thành danh sách
-        $classesData = array_values($classSummary);
-        
-        // Sắp xếp lớp theo điểm trung bình từ cao xuống thấp
-        usort($classesData, function($a, $b) {
-            return $b['average_score'] <=> $a['average_score'];
-        });
-        
-        $overallAverage = $totalStudents > 0 ? round($totalAverage / $totalStudents, 2) : null;
-        $passRate = $totalStudents > 0 ? round(($passedStudents / $totalStudents) * 100, 2) : null;
-        
-        // Tính tỷ lệ phần trăm các loại học lực
-        $excellentRate = $totalStudents > 0 ? round(($excellent / $totalStudents) * 100, 2) : 0;
-        $goodRate = $totalStudents > 0 ? round(($good / $totalStudents) * 100, 2) : 0;
-        $averageRate = $totalStudents > 0 ? round(($average / $totalStudents) * 100, 2) : 0;
-        $belowRate = $totalStudents > 0 ? round(($below / $totalStudents) * 100, 2) : 0;
-        
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'subject' => [
-                    'id' => $subject->id,
-                    'name' => $subject->name,
-                    'subject_code' => $subject->subject_code ?? null,
-                ],
-                'overall' => [
-                    'total_students' => $totalStudents,
-                    'average_score' => $overallAverage,
-                    'pass_rate' => $passRate,
-                    'excellent' => [
-                        'count' => $excellent,
-                        'percentage' => $excellentRate,
-                    ],
-                    'good' => [
-                        'count' => $good,
-                        'percentage' => $goodRate,
-                    ],
-                    'average' => [
-                        'count' => $average,
-                        'percentage' => $averageRate,
-                    ],
-                    'below_average' => [
-                        'count' => $below,
-                        'percentage' => $belowRate,
-                    ],
-                ],
-                'classes' => $classesData,
-                'students' => $studentScores,
-            ]
-        ]);
+        // Tính điểm trung bình cuối cùng
+        return ($totalWeight > 0) ? round($totalWeightedScore / $totalWeight, 2) : null;
     }
 } 

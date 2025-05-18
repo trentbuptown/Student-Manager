@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Classes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -133,5 +134,52 @@ class TeacherController extends Controller
     {
         $teacher->delete();
         return response()->json(null, 204);
+    }
+    
+    /**
+     * Lấy danh sách lớp học của giáo viên
+     */
+    public function getClasses(Teacher $teacher)
+    {
+        try {
+            // Nếu giáo viên là GVCN, lấy lớp chủ nhiệm
+            if ($teacher->is_gvcn) {
+                $homeroom = Classes::where('teacher_id', $teacher->id)->first();
+                
+                if ($homeroom) {
+                    // Nếu có lớp chủ nhiệm, đánh dấu nó
+                    $homeroom->is_homeroom = true;
+                }
+            }
+            
+            // Lấy danh sách tất cả các lớp mà giáo viên dạy
+            $classes = DB::table('classes')
+                ->join('teacher_subject', function ($join) use ($teacher) {
+                    $join->on('classes.id', '=', 'teacher_subject.class_id')
+                        ->where('teacher_subject.teacher_id', '=', $teacher->id);
+                })
+                ->join('subjects', 'teacher_subject.subject_id', '=', 'subjects.id')
+                ->select(
+                    'classes.id',
+                    'classes.name as class_name',
+                    'classes.grade_id',
+                    'subjects.id as subject_id',
+                    'subjects.name as subject_name',
+                    'teacher_subject.lesson_period',
+                    DB::raw('CASE WHEN classes.teacher_id = ' . $teacher->id . ' THEN true ELSE false END as is_homeroom')
+                )
+                ->distinct()
+                ->get();
+                
+            return response()->json([
+                'status' => 'success',
+                'data' => $classes
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra khi lấy danh sách lớp học: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

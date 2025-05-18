@@ -13,7 +13,7 @@ class TeacherSubjectController extends Controller
      */
     public function index()
     {
-        $teacherSubjects = TeacherSubject::with(['teacher', 'subject'])->get();
+        $teacherSubjects = TeacherSubject::with(['teacher', 'subject', 'class'])->get();
         return response()->json($teacherSubjects);
     }
 
@@ -24,7 +24,9 @@ class TeacherSubjectController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'teacher_id' => 'required|exists:teachers,id',
-            'subject_id' => 'required|exists:subjects,id'
+            'subject_id' => 'required|exists:subjects,id',
+            'class_id' => 'nullable|exists:classes,id',
+            'lesson_period' => 'nullable|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -32,7 +34,7 @@ class TeacherSubjectController extends Controller
         }
 
         $teacherSubject = TeacherSubject::create($request->all());
-        return response()->json($teacherSubject, 201);
+        return response()->json($teacherSubject->load(['teacher', 'subject', 'class']), 201);
     }
 
     /**
@@ -40,7 +42,7 @@ class TeacherSubjectController extends Controller
      */
     public function show(TeacherSubject $teacherSubject)
     {
-        return response()->json($teacherSubject->load(['teacher', 'subject']));
+        return response()->json($teacherSubject->load(['teacher', 'subject', 'class']));
     }
 
     /**
@@ -50,7 +52,9 @@ class TeacherSubjectController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'teacher_id' => 'exists:teachers,id',
-            'subject_id' => 'exists:subjects,id'
+            'subject_id' => 'exists:subjects,id',
+            'class_id' => 'nullable|exists:classes,id',
+            'lesson_period' => 'nullable|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -58,7 +62,7 @@ class TeacherSubjectController extends Controller
         }
 
         $teacherSubject->update($request->all());
-        return response()->json($teacherSubject);
+        return response()->json($teacherSubject->load(['teacher', 'subject', 'class']));
     }
 
     /**
