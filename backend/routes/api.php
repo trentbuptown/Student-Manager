@@ -11,7 +11,6 @@ use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\ReportController;
 
 
 Route::get('/user', function (Request $request) {
@@ -23,15 +22,17 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register-first-admin', [AuthController::class, 'registerFirstAdmin']);
 
+// Test routes (tạm thời public để test)
+Route::apiResource('grades', GradeController::class);
+Route::apiResource('classes', ClassController::class);
+Route::get('/scores/school-years', [ScoreController::class, 'getSchoolYears']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    
-    // Thêm route cho thay đổi mật khẩu
-    Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     // Admin routes
     Route::middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
@@ -39,17 +40,22 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('score-details', ScoreDetailController::class);
-    Route::apiResource('grades', GradeController::class);
     Route::apiResource('rules', RuleController::class);
-    Route::apiResource('classes', ClassController::class);
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('students', StudentController::class);
 
     // Teacher Subject Routes
     Route::apiResource('teacher-subjects', TeacherSubjectController::class);
+    
+    // Lấy danh sách lớp học của giáo viên
+    Route::get('/teachers/{teacher}/classes', [TeacherController::class, 'getClasses']);
 
-    // Score Routes
+    // Endpoint cho quản lý điểm - phải đặt trước route resource
+    Route::get('/scores/average', [ScoreController::class, 'calculateAverage']);
+    Route::post('/scores/bulk', [ScoreController::class, 'bulkCreate']);
+    
+    // Score Routes - phải đặt sau các route cụ thể
     Route::apiResource('scores', ScoreController::class);
     
     // Báo cáo và thống kê

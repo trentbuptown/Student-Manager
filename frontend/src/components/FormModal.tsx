@@ -73,6 +73,7 @@ const FormModal = ({
         | "lesson"
         | "result"
         | "event"
+        | "parent"
         | "exam"
         | "report";
 
