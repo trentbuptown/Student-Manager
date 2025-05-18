@@ -3,6 +3,8 @@ import { date, z } from "zod";
 export const subjectSchema = z.object({
     id: z.coerce.number().optional(),
     name: z.string().min(1, { message: "Vui lòng nhập tên môn học." }),
+    code: z.string().optional(),
+    description: z.string().optional(),
     teachers: z.array(z.string()), //teacher ids
 });
 
@@ -10,11 +12,9 @@ export type SubjectSchema = z.infer<typeof subjectSchema>;
 
 export const classSchema = z.object({
     id: z.coerce.number().optional(),
-    name: z.string().min(1, { message: "Vui lòng nhập tên môn học." }),
-    capacity: z.coerce.number().min(1, { message: "Vui lòng nhập số lượng." }),
-    gradeId: z.union([z.literal(10), z.literal(11), z.literal(12)], {
-        message: "Vui lòng chọn khối lớp.",
-    }),
+    name: z.string().min(1, { message: "Vui lòng nhập tên lớp học." }),
+    capacity: z.coerce.number().optional(),
+    gradeId: z.coerce.number({ message: "Vui lòng chọn khối lớp" }),
     supervisorId: z.coerce.string().optional(),
 });
 
@@ -40,36 +40,19 @@ export const teacherSchema = z.object({
 export type TeacherSchema = z.infer<typeof teacherSchema>;
 
 export const studentSchema = z.object({
-    id: z.string().optional(),
-    username: z
-        .string()
-        .min(3, { message: "Tên người dùng phải chứa ít nhất 4 ký tự. " })
-        .max(20, { message: "Tên người dùng không được vượt quá 20 ký tự." }),
-    password: z
-        .string()
-        .min(8, { message: "Mật khẩu phải chứa ít nhất 8 ký tự. " })
-        .optional()
-        .or(z.literal("")),
-    name: z.string().min(1, { message: "Vui lòng nhập tên." }),
-    surname: z.string().min(1, { message: " Vui lòng nhập họ." }),
-    email: z
-        .string()
-        .email({ message: "Email không hợp lệ." })
-        .optional()
-        .or(z.literal("")),
+    name: z.string().min(1, "Vui lòng nhập họ và tên đầy đủ của học sinh"),
+    birth_date: z.string().min(1, "Vui lòng chọn ngày sinh"),
+    gender: z.enum(["male", "female", "other"], { message: "Vui lòng chọn giới tính" }),
     phone: z.string().optional(),
-    address: z.string(),
-    img: z.string().optional(),
-    birthday: z.coerce.date({ message: "Vui lòng nhập ngày sinh." }),
-    sex: z.enum(["MALE", "FEMALE"], { message: "Vui lòng nhập giới tính." }),
-    gradeId: z.union([z.literal(10), z.literal(11), z.literal(12)], {
-        message: "Vui lòng chọn khối lớp.",
-    }),
-    classId: z.coerce.number().min(1, { message: "Vui lòng nhập lớp." }),
-    parentId: z.string().min(1, { message: "Vui lòng nhập tên phụ huynh." }),
+    class_id: z.coerce.number().min(1, "Vui lòng chọn lớp học"),
+    email: z.string().email("Email không hợp lệ").min(1, "Vui lòng nhập email"),
+    username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự").optional(),
+    password: z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự").optional(),
+    id: z.number().optional(),
+    user_id: z.number().optional()
 });
 
-export type StudentSchema = z.infer<typeof studentSchema>;
+export type StudentFormData = z.infer<typeof studentSchema>;
 
 export const examSchema = z.object({
     id: z.coerce.number().optional(),

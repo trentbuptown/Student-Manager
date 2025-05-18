@@ -41,6 +41,7 @@ const SubjectListPage = () => {
         try {
             setLoading(true);
             const response = await subjectService.getAll();
+            console.log("Fetched subjects:", response);
             setSubjects(response);
         } catch (error) {
             console.error("Error fetching subjects:", error);
@@ -54,6 +55,12 @@ const SubjectListPage = () => {
     useEffect(() => {
         fetchSubjects();
     }, []);
+
+    // Hàm refresh để tải lại dữ liệu
+    const handleRefresh = () => {
+        console.log("Refreshing subjects list...");
+        fetchSubjects();
+    };
 
     if (loading) {
         return <div className="p-4">Đang tải danh sách môn học...</div>;
@@ -75,11 +82,13 @@ const SubjectListPage = () => {
                                 table="subject"
                                 type="update"
                                 data={item}
+                                onSuccess={handleRefresh}
                             />
                             <FormModal
                                 table="subject"
                                 type="delete"
                                 id={item.id}
+                                onSuccess={handleRefresh}
                             />
                         </>
                     )}
@@ -115,7 +124,11 @@ const SubjectListPage = () => {
                             />
                         </button>
                         {role === "admin" && (
-                            <FormModal table="subject" type="create" />
+                            <FormModal 
+                                table="subject" 
+                                type="create" 
+                                onSuccess={handleRefresh}
+                            />
                         )}
                     </div>
                 </div>

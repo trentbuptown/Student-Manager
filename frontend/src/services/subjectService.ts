@@ -1,4 +1,5 @@
 import axiosClient from './axiosClient';
+import axios from 'axios';
 
 export interface Teacher {
     id: number | string; // Assuming teacher id can be number or string
@@ -45,14 +46,60 @@ const subjectService = {
 
   // Cập nhật môn học
   update: async (id: number, subject: Partial<Subject>): Promise<SingleSubjectResponse> => {
-    const response = await axiosClient.put(`/subjects/${id}`, subject);
-    return response.data;
+    console.log(`======= UPDATING SUBJECT ID ${id} =======`);
+    console.log(`Request data:`, subject);
+    
+    try {
+      // Debug the request URL
+      const url = `/subjects/${id}`;
+      console.log(`Making PUT request to: ${url}`);
+      
+      // Làm rõ thông tin teachers trước khi gửi request
+      if (subject.teachers) {
+        console.log(`Teachers to update:`, subject.teachers);
+      }
+      
+      const response = await axiosClient.put(url, subject);
+      console.log('Update successful! Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('🚨 Error updating subject!', error);
+      
+      // Log thêm thông tin lỗi
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Error status:', error.response.status);
+        console.error('Error data:', error.response.data);
+        console.error('Request config:', error.config);
+      }
+      
+      throw error;
+    }
   },
 
   // Xóa môn học
   delete: async (id: number): Promise<{ message: string }> => {
-    const response = await axiosClient.delete(`/subjects/${id}`);
-    return response.data;
+    console.log(`======= DELETING SUBJECT ID ${id} =======`);
+    
+    try {
+      // Debug the request URL
+      const url = `/subjects/${id}`;
+      console.log(`Making DELETE request to: ${url}`);
+      
+      const response = await axiosClient.delete(url);
+      console.log('Delete successful! Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('🚨 Error deleting subject!', error);
+      
+      // Log thêm thông tin lỗi
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Error status:', error.response.status);
+        console.error('Error data:', error.response.data);
+        console.error('Request config:', error.config);
+      }
+      
+      throw error;
+    }
   },
 };
 

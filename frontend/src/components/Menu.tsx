@@ -25,12 +25,6 @@ const menuItems = [
                 visible: ["admin", "teacher"],
             },
             {
-                icon: "/parent.png",
-                label: "Phụ huynh",
-                href: "/list/parents",
-                visible: ["admin", "teacher"],
-            },
-            {
                 icon: "/subject.png",
                 label: "Môn học",
                 href: "/list/subjects",

@@ -1,8 +1,8 @@
 import { FieldError } from "react-hook-form";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 
 type InputFieldProps = {
-    label: string;
+    label: string | ReactNode;
     type?: string;
     register: any;
     name: string;
