@@ -201,10 +201,17 @@ export const deleteTeacher = async (id: number): Promise<{success: boolean; mess
 };
 
 // Lấy danh sách lớp học của giáo viên
-export const getTeacherClasses = async (teacherId: number): Promise<any[]> => {
+export const getTeacherClasses = async (teacherId: number): Promise<any> => {
   try {
     const response = await axiosClient.get(`/teachers/${teacherId}/classes`);
-    return response.data;
+    console.log('API response from /teachers/' + teacherId + '/classes:', response.data);
+    
+    // Xử lý trường hợp response có cấu trúc { status: 'success', data: [] }
+    if (response.data && response.data.status === 'success' && Array.isArray(response.data.data)) {
+      return response.data;
+    }
+    
+    return response.data; // Trả về dữ liệu gốc nếu không phù hợp với cấu trúc trên
   } catch (error) {
     console.error(`Error fetching classes for teacher ${teacherId}:`, error);
     toast.error('Không thể tải danh sách lớp học');
@@ -232,6 +239,40 @@ export const getTeacherSchedule = async (teacherId: number): Promise<any[]> => {
   } catch (error) {
     console.error(`Error fetching schedule for teacher ${teacherId}:`, error);
     toast.error('Không thể tải thời khóa biểu');
+    return [];
+  }
+};
+
+// Lấy danh sách tất cả học sinh của giáo viên
+export const getTeacherStudents = async (teacherId: number): Promise<any[]> => {
+  try {
+    const response = await axiosClient.get(`/teachers/${teacherId}/students`);
+    console.log('API response for teacher students:', response);
+    
+    if (response.data && response.data.status === 'success' && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error(`Error fetching students for teacher ${teacherId}:`, error);
+    toast.error('Không thể tải danh sách học sinh');
+    return [];
+  }
+};
+
+// Lấy danh sách học sinh của một lớp cụ thể
+export const getTeacherClassStudents = async (teacherId: number, classId: number): Promise<any[]> => {
+  try {
+    const response = await axiosClient.get(`/teachers/${teacherId}/classes/${classId}/students`);
+    console.log('API response for class students:', response);
+    
+    if (response.data && response.data.status === 'success' && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    console.error(`Error fetching students for class ${classId}:`, error);
+    toast.error('Không thể tải danh sách học sinh của lớp');
     return [];
   }
 }; 

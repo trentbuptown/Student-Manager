@@ -9,7 +9,7 @@ export type Score = {
   class_id: number;
   score_value: number;
   score_type: string;
-  semester: number;
+  semester: 1 | 2;
   school_year: string;
   created_at?: string;
   updated_at?: string;
@@ -40,8 +40,12 @@ export type ScoreCreateParams = {
   class_id: number;
   score_value: number;
   score_type: string;
-  semester: number;
+  semester: 1 | 2;
   school_year: string;
+  oral_test?: number | null;
+  fifteen_minute_test?: number | null;
+  forty_five_minute_test?: number | null;
+  final_exam?: number | null;
 };
 
 export type ScoreUpdateParams = {
@@ -51,8 +55,12 @@ export type ScoreUpdateParams = {
   class_id?: number;
   score_value?: number;
   score_type?: string;
-  semester?: number;
+  semester?: 1 | 2;
   school_year?: string;
+  oral_test?: number | null;
+  fifteen_minute_test?: number | null;
+  forty_five_minute_test?: number | null;
+  final_exam?: number | null;
 };
 
 export type ScoreFilter = {
@@ -65,245 +73,233 @@ export type ScoreFilter = {
   score_type?: string;
 };
 
-const scoreService = {
-  // Lấy tất cả điểm với bộ lọc tùy chọn
-  getAll: async (filters?: ScoreFilter): Promise<Score[]> => {
-    try {
-      let url = '/scores';
-      
-      // Thêm các tham số lọc nếu có
-      if (filters) {
-        const queryParams = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            queryParams.append(key, value.toString());
-          }
-        });
-        
-        if (queryParams.toString()) {
-          url += `?${queryParams.toString()}`;
-        }
-      }
-      
-      const response = await axiosClient.get(url);
-      
-      // Đảm bảo dữ liệu trả về là mảng hợp lệ
-      if (response && response.data) {
-        return Array.isArray(response.data) ? response.data : [];
-      }
-      return [];
-    } catch (error: any) {
-      console.error('Error fetching scores:', error);
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, trả về mảng rỗng thay vì thông báo lỗi
-        console.warn('Scores API endpoint may not be implemented yet');
-      } else {
-        toast.error('Không thể tải danh sách điểm');
-      }
-      return [];
-    }
-  },
+export type ScoreBulkCreateParams = {
+  scores: ScoreCreateParams[];
+};
 
-  // Lấy thông tin chi tiết điểm
-  getById: async (id: number): Promise<Score | null> => {
-    try {
-      const response = await axiosClient.get(`/scores/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching score ${id}:`, error);
-      toast.error('Không thể tải thông tin điểm');
-      return null;
-    }
-  },
-
-  // Lấy điểm của một học sinh
-  getByStudentId: async (studentId: number, filters?: ScoreFilter): Promise<Score[]> => {
-    try {
-      let url = `/scores?student_id=${studentId}`;
-      
-      // Thêm các tham số lọc nếu có
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '' && key !== 'student_id') {
-            url += `&${key}=${value}`;
-          }
-        });
-      }
-      
-      const response = await axiosClient.get(url);
-      return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
-      console.error(`Error fetching scores for student ${studentId}:`, error);
-      toast.error('Không thể tải danh sách điểm của học sinh');
-      return [];
-    }
-  },
-
-  // Tạo điểm mới
-  create: async (params: ScoreCreateParams): Promise<Score | null> => {
-    try {
-      const response = await axiosClient.post('/scores', params);
-      toast.success('Thêm điểm thành công');
-      return response.data;
-    } catch (error: any) {
-      console.error('Error creating score:', error);
-      
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, hiển thị thông báo phù hợp
-        toast.warning('Chức năng thêm điểm đang trong quá trình phát triển');
-        console.warn('Scores API endpoint may not be implemented yet');
-        
-        // Trả về một đối tượng Score giả lập để UI không bị lỗi
-        return {
-          id: Math.floor(Math.random() * 1000) + 1, // ID ngẫu nhiên
-          ...params,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      } else if (error.response?.data?.errors) {
-        Object.values(error.response.data.errors).forEach((messages: any) => {
-          if (Array.isArray(messages)) {
-            messages.forEach((msg: string) => toast.error(msg));
-          }
-        });
-      } else {
-        toast.error('Không thể thêm điểm');
-      }
-      
-      return null;
-    }
-  },
-
-  // Cập nhật điểm
-  update: async (id: number, params: ScoreUpdateParams): Promise<Score | null> => {
-    try {
-      const response = await axiosClient.put(`/scores/${id}`, params);
-      toast.success('Cập nhật điểm thành công');
-      return response.data;
-    } catch (error: any) {
-      console.error(`Error updating score ${id}:`, error);
-      
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, hiển thị thông báo phù hợp
-        toast.warning('Chức năng cập nhật điểm đang trong quá trình phát triển');
-        console.warn('Scores API endpoint may not be implemented yet');
-        
-        // Trả về một đối tượng Score giả lập đã cập nhật để UI không bị lỗi
-        return {
-          id,
-          student_id: params.student_id || 0,
-          subject_id: params.subject_id || 0,
-          teacher_id: params.teacher_id || 0,
-          class_id: params.class_id || 0,
-          score_value: params.score_value || 0,
-          score_type: params.score_type || '',
-          semester: params.semester || 1,
-          school_year: params.school_year || '',
-          updated_at: new Date().toISOString()
-        };
-      } else if (error.response?.data?.errors) {
-        Object.values(error.response.data.errors).forEach((messages: any) => {
-          if (Array.isArray(messages)) {
-            messages.forEach((msg: string) => toast.error(msg));
-          }
-        });
-      } else {
-        toast.error('Không thể cập nhật điểm');
-      }
-      
-      return null;
-    }
-  },
-
-  // Xóa điểm
-  delete: async (id: number): Promise<boolean> => {
-    try {
-      await axiosClient.delete(`/scores/${id}`);
-      toast.success('Xóa điểm thành công');
-      return true;
-    } catch (error: any) {
-      console.error(`Error deleting score ${id}:`, error);
-      
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, hiển thị thông báo phù hợp
-        toast.warning('Chức năng xóa điểm đang trong quá trình phát triển');
-        console.warn('Scores API endpoint may not be implemented yet');
-        
-        // Giả lập thành công để UI có thể cập nhật
-        return true;
-      }
-      
-      toast.error('Không thể xóa điểm');
-      return false;
-    }
-  },
-
-  // Nhập điểm hàng loạt
-  bulkCreate: async (scores: ScoreCreateParams[]): Promise<boolean> => {
-    try {
-      await axiosClient.post('/scores/bulk', { scores });
-      toast.success('Nhập điểm hàng loạt thành công');
-      return true;
-    } catch (error: any) {
-      console.error('Error bulk creating scores:', error);
-      
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, hiển thị thông báo phù hợp
-        toast.warning('Chức năng nhập điểm hàng loạt đang trong quá trình phát triển');
-        console.warn('Bulk scores API endpoint may not be implemented yet');
-        
-        // Giả lập thành công để UI có thể cập nhật
-        return true;
-      }
-      
-      toast.error('Không thể nhập điểm hàng loạt');
-      return false;
-    }
-  },
-
-  // Lấy các năm học có sẵn
-  getSchoolYears: async (): Promise<string[]> => {
-    // Tạo danh sách năm học mặc định
-    const currentYear = new Date().getFullYear();
-    const defaultYears: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      defaultYears.push(`${currentYear - i - 1}-${currentYear - i}`);
-    }
-    
-    try {
-      // Bọc trong try-catch và bỏ qua mọi lỗi
-      const response = await axiosClient.get('/scores/school-years');
-      if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        return response.data;
-      }
-      // Trả về danh sách mặc định nếu dữ liệu không hợp lệ
-      return defaultYears;
-    } catch (error) {
-      console.warn('API endpoint /scores/school-years not available, using default years:', error);
-      // Luôn trả về danh sách mặc định khi có lỗi
-      return defaultYears;
-    }
-  },
-
-  // Tính điểm trung bình cho một học sinh theo môn học
-  calculateAverage: async (studentId: number, subjectId: number, semester: number, schoolYear: string): Promise<number | null> => {
-    try {
-      const response = await axiosClient.get(`/scores/average?student_id=${studentId}&subject_id=${subjectId}&semester=${semester}&school_year=${schoolYear}`);
-      return response.data.average;
-    } catch (error: any) {
-      console.error('Error calculating average score:', error);
-      
-      if (error.response?.status === 404) {
-        // Nếu endpoint chưa tồn tại, hiển thị thông báo phù hợp trong console nhưng không hiển thị cho người dùng
-        console.warn('Average score API endpoint may not be implemented yet');
-        
-        // Trả về giá trị mặc định để UI không bị lỗi
-        return 0;
-      }
-      
-      return null;
-    }
+// Lấy danh sách điểm theo bộ lọc
+export const getScores = async (filters: any): Promise<Score[]> => {
+  try {
+    const response = await axiosClient.get('/scores', { params: filters });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching scores:', error);
+    toast.error('Không thể tải danh sách điểm');
+    return [];
   }
 };
 
-export default scoreService; 
+// Lấy thông tin chi tiết của một điểm
+export const getScoreById = async (id: number): Promise<Score | null> => {
+  try {
+    const response = await axiosClient.get(`/scores/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching score ${id}:`, error);
+    toast.error('Không thể tải thông tin điểm');
+    return null;
+  }
+};
+
+// Tạo điểm mới
+export const createScore = async (params: ScoreCreateParams): Promise<Score | null> => {
+  try {
+    const response = await axiosClient.post('/scores', params);
+    toast.success('Thêm điểm thành công');
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating score:', error);
+    
+    if (error.response?.data?.errors) {
+      Object.values(error.response.data.errors).forEach((messages: any) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg: string) => toast.error(msg));
+        }
+      });
+    } else {
+      toast.error('Không thể thêm điểm');
+    }
+    
+    return null;
+  }
+};
+
+// Cập nhật điểm
+export const updateScore = async (id: number, params: ScoreUpdateParams): Promise<Score | null> => {
+  try {
+    const response = await axiosClient.put(`/scores/${id}`, params);
+    toast.success('Cập nhật điểm thành công');
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error updating score ${id}:`, error);
+    
+    if (error.response?.data?.errors) {
+      Object.values(error.response.data.errors).forEach((messages: any) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg: string) => toast.error(msg));
+        }
+      });
+    } else {
+      toast.error('Không thể cập nhật điểm');
+    }
+    
+    return null;
+  }
+};
+
+// Cập nhật điểm theo loại (miệng, 15p, 45p, cuối kỳ)
+export const updateTypeScore = async (params: {
+  student_id: number;
+  subject_id: number;
+  teacher_id: number;
+  class_id: number;
+  semester: 1 | 2;
+  school_year: string;
+  score_type: string;
+  score_value: number;
+}): Promise<Score | null> => {
+  try {
+    console.log('Gọi API cập nhật điểm theo loại:', params);
+    const response = await axiosClient.post('/scores/update-type', params);
+    toast.success('Cập nhật điểm thành công');
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error updating score by type:`, error);
+    
+    if (error.response?.data?.errors) {
+      Object.values(error.response.data.errors).forEach((messages: any) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg: string) => toast.error(msg));
+        }
+      });
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error('Không thể cập nhật điểm');
+    }
+    
+    return null;
+  }
+};
+
+// Xóa điểm
+export const deleteScore = async (id: number): Promise<boolean> => {
+  try {
+    await axiosClient.delete(`/scores/${id}`);
+    toast.success('Xóa điểm thành công');
+    return true;
+  } catch (error: any) {
+    console.error(`Error deleting score ${id}:`, error);
+    toast.error('Không thể xóa điểm');
+    return false;
+  }
+};
+
+// Tạo nhiều điểm cùng lúc
+export const bulkCreateScores = async (params: ScoreBulkCreateParams): Promise<Score[] | null> => {
+  try {
+    const response = await axiosClient.post('/scores/bulk', params);
+    toast.success('Thêm điểm hàng loạt thành công');
+    return response.data;
+  } catch (error: any) {
+    console.error('Error bulk creating scores:', error);
+    
+    if (error.response?.data?.errors) {
+      Object.values(error.response.data.errors).forEach((messages: any) => {
+        if (Array.isArray(messages)) {
+          messages.forEach((msg: string) => toast.error(msg));
+        }
+      });
+    } else {
+      toast.error('Không thể thêm điểm hàng loạt');
+    }
+    
+    return null;
+  }
+};
+
+// Tính điểm trung bình
+export const calculateAverageScore = async (filters: any): Promise<any> => {
+  try {
+    const response = await axiosClient.get('/scores/average', { params: filters });
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating average scores:', error);
+    toast.error('Không thể tính điểm trung bình');
+    return null;
+  }
+};
+
+// Lấy các năm học trong hệ thống
+export const getSchoolYears = async (): Promise<string[]> => {
+  try {
+    const response = await axiosClient.get('/scores/school-years');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching school years:', error);
+    toast.error('Không thể tải danh sách năm học');
+    return [];
+  }
+};
+
+// Lấy báo cáo điểm của một học sinh
+export const getStudentReport = async (studentId: number, filters?: any): Promise<any> => {
+  try {
+    const response = await axiosClient.get(`/reports/student/${studentId}`, { params: filters });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching report for student ${studentId}:`, error);
+    toast.error('Không thể tải báo cáo điểm của học sinh');
+    return null;
+  }
+};
+
+// Lấy báo cáo điểm của một lớp
+export const getClassReport = async (classId: number, filters?: any): Promise<any> => {
+  try {
+    console.log('Gọi API với params:', { classId, filters });
+    const response = await axiosClient.get(`/reports/class/${classId}`, { 
+      params: filters,
+      timeout: 30000 // Tăng timeout lên 30 giây
+    });
+    console.log('Kết quả API response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error fetching report for class ${classId}:`, error);
+    
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+      
+      if (error.response.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.response.data?.errors) {
+        Object.values(error.response.data.errors).forEach((messages: any) => {
+          if (Array.isArray(messages)) {
+            messages.forEach((msg: string) => toast.error(msg));
+          }
+        });
+      } else {
+        toast.error(`Lỗi ${error.response.status}: Không thể tải báo cáo điểm của lớp`);
+      }
+    } else if (error.request) {
+      toast.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+    } else {
+      toast.error('Không thể tải báo cáo điểm của lớp');
+    }
+    
+    return null;
+  }
+};
+
+// Lấy báo cáo điểm của một môn học
+export const getSubjectReport = async (subjectId: number, filters?: any): Promise<any> => {
+  try {
+    const response = await axiosClient.get(`/reports/subject/${subjectId}`, { params: filters });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching report for subject ${subjectId}:`, error);
+    toast.error('Không thể tải báo cáo điểm của môn học');
+    return null;
+  }
+}; 

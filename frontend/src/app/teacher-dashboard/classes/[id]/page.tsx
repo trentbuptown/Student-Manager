@@ -225,8 +225,8 @@ export default function ClassDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
+                  {students.map((student, index) => (
+                    <tr key={`${index}-${student.id}`} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {student.student_id}
                       </td>

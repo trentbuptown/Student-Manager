@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import scoreService, { Score, ScoreFilter } from "@/services/scoreService";
+import { getScores, getScoreById, createScore, updateScore, deleteScore, getSchoolYears, Score, ScoreFilter, ScoreCreateParams, ScoreUpdateParams } from "@/services/scoreService";
 import { getAllTeachers, Teacher } from "@/services/teacherService";
 import { getStudents } from "@/services/studentService";
 import subjectService, { Subject } from "@/services/subjectService";
@@ -48,7 +48,7 @@ export default function ScoreManagementPage() {
         let classData: Class[] = [];
         
         try {
-          scoreData = await scoreService.getAll();
+          scoreData = await getScores({});
         } catch (error) {
           console.error('Error fetching scores:', error);
           // Giữ mảng rỗng nếu có lỗi
@@ -85,7 +85,7 @@ export default function ScoreManagementPage() {
         setClasses(classData);
         
         // Năm học được xử lý riêng trong service, không cần xử lý lỗi ở đây
-        const yearData = await scoreService.getSchoolYears();
+        const yearData = await getSchoolYears();
         if (yearData && yearData.length > 0) {
           setSchoolYears(yearData);
         }
@@ -106,7 +106,7 @@ export default function ScoreManagementPage() {
     setCurrentFilters(filters);
     
     try {
-      const filteredScores = await scoreService.getAll(filters);
+      const filteredScores = await getScores(filters);
       setScores(filteredScores);
     } catch (error) {
       console.error('Error filtering scores:', error);
@@ -123,7 +123,7 @@ export default function ScoreManagementPage() {
     setCurrentFilters({});
     
     try {
-      const allScores = await scoreService.getAll();
+      const allScores = await getScores({});
       setScores(allScores);
     } catch (error) {
       console.error('Error resetting filter:', error);
@@ -182,8 +182,12 @@ export default function ScoreManagementPage() {
       Cell: ({ value }: { value: string }) => {
         const scoreTypes: Record<string, string> = {
           'mieng': 'Miệng',
-          '15p': '15 phút',
-          '1tiet': '1 tiết',
+          '15p': 'Điểm 15 phút',
+          'regular': 'Điểm thường xuyên',
+          'test15min': 'Kiểm tra 15 phút',
+          'test45min': 'Kiểm tra 45 phút',
+          'oral': 'Kiểm tra miệng',
+          'final': 'Kiểm tra cuối kỳ',
           'giuaky': 'Giữa kỳ',
           'cuoiky': 'Cuối kỳ'
         };
@@ -217,12 +221,12 @@ export default function ScoreManagementPage() {
   // Xử lý tạo mới
   const handleCreate = async (data: any) => {
     try {
-      const result = await scoreService.create(data);
+      const result = await createScore(data);
       
       if (result) {
         // Tải lại danh sách điểm với bộ lọc hiện tại
         try {
-          const updatedScores = await scoreService.getAll(currentFilters);
+          const updatedScores = await getScores(currentFilters);
           setScores(updatedScores);
         } catch (error) {
           console.error('Error reloading scores after create:', error);
@@ -244,12 +248,12 @@ export default function ScoreManagementPage() {
     if (!selectedItem) return;
     
     try {
-      const result = await scoreService.update(selectedItem.id, data);
+      const result = await updateScore(selectedItem.id, data);
       
       if (result) {
         // Tải lại danh sách điểm với bộ lọc hiện tại
         try {
-          const updatedScores = await scoreService.getAll(currentFilters);
+          const updatedScores = await getScores(currentFilters);
           setScores(updatedScores);
         } catch (error) {
           console.error('Error reloading scores after update:', error);
@@ -270,7 +274,7 @@ export default function ScoreManagementPage() {
   const handleDelete = async (id: number) => {
     if (confirm('Bạn có chắc chắn muốn xóa điểm này không?')) {
       try {
-        const success = await scoreService.delete(id);
+        const success = await deleteScore(id);
         
         if (success) {
           // Cập nhật danh sách điểm sau khi xóa
@@ -320,6 +324,7 @@ export default function ScoreManagementPage() {
             teachers={teachers}
             subjects={subjects}
             classes={classes}
+            students={students}
             schoolYears={schoolYears}
             onFilter={handleFilter}
             onReset={handleResetFilter}

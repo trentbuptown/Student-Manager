@@ -7,6 +7,11 @@ export type TeacherSubject = {
   subject_id: number;
   class_id?: number | null;
   lesson_period?: string | null;
+  day_of_week?: string | null;
+  period?: number | null;
+  room?: string | null;
+  semester?: number | null;
+  school_year?: string | null;
   teacher?: {
     id: number;
     name: string;
@@ -27,6 +32,11 @@ export type TeacherSubjectCreateParams = {
   subject_id: number;
   class_id?: number | null;
   lesson_period?: string | null;
+  day_of_week?: string | null;
+  period?: number | null;
+  room?: string | null;
+  semester?: number;
+  school_year?: string;
 };
 
 export type TeacherSubjectUpdateParams = {
@@ -34,6 +44,11 @@ export type TeacherSubjectUpdateParams = {
   subject_id?: number;
   class_id?: number | null;
   lesson_period?: string | null;
+  day_of_week?: string | null;
+  period?: number | null;
+  room?: string | null;
+  semester?: number;
+  school_year?: string;
 };
 
 // Kiểu dữ liệu cho tiết học đã được phân tích
@@ -147,8 +162,57 @@ const teacherSubjectService = {
     const periodEntries = lessonPeriod.split(', ');
     
     periodEntries.forEach(entry => {
-      // Phân tích cú pháp như "Tiết 1-2 Thứ 2"
-      const match = entry.match(/Tiết (\d+)-(\d+) (.*)/);
+      // Trường hợp 1: Định dạng "Tiết 1-2 Thứ hai"
+      let match = entry.match(/Tiết (\d+)-(\d+) (.*)/);
+      
+      // Trường hợp 2: Định dạng "Thứ hai:1-2" hoặc "Thứ 2:1-2"
+      if (!match) {
+        match = entry.match(/(.*):(\d+)-(\d+)/);
+        if (match) {
+          // Đảo vị trí để phù hợp với định dạng xử lý bên dưới
+          match = [entry, match[2], match[3], match[1]];
+        }
+      }
+      
+      // Trường hợp 3: Định dạng "Thứ hai:1,2,3"
+      if (!match) {
+        match = entry.match(/(.*):(\d+)(,\d+)*/);
+        if (match) {
+          const day = match[1];
+          const numbers = entry.split(':')[1].split(',').map(Number);
+          if (numbers.length > 0) {
+            // Sắp xếp các số
+            numbers.sort((a, b) => a - b);
+            
+            // Tạo các phạm vi liên tiếp
+            let start = numbers[0];
+            let end = numbers[0];
+            
+            for (let i = 1; i < numbers.length; i++) {
+              if (numbers[i] === end + 1) {
+                end = numbers[i];
+              } else {
+                result.push({
+                  day,
+                  startPeriod: start,
+                  endPeriod: end
+                });
+                
+                start = numbers[i];
+                end = numbers[i];
+              }
+            }
+            
+            result.push({
+              day,
+              startPeriod: start,
+              endPeriod: end
+            });
+          }
+        }
+      }
+      
+      // Xử lý trường hợp đã tìm thấy mẫu trong trường hợp 1 hoặc 2
       if (match) {
         const startPeriod = parseInt(match[1]);
         const endPeriod = parseInt(match[2]);

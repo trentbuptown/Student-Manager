@@ -1,5 +1,6 @@
 import axiosClient from './axiosClient';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export interface Teacher {
     id: number | string; // Assuming teacher id can be number or string
@@ -12,7 +13,7 @@ export interface Teacher {
 export interface Subject {
   id: number;
   name: string;
-  code: string;
+  code?: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -20,10 +21,84 @@ export interface Subject {
   teachers?: Teacher[]; // Update to array of Teacher interface
 }
 
+export interface StudentSubject {
+  id: number;
+  name: string;
+  teacher: string;
+  teacher_id?: number;
+  lesson_period?: number;
+  lessons_per_week: number;
+  description?: string;
+  semester?: number;
+  school_year?: string;
+}
+
 export interface SingleSubjectResponse {
   data: Subject;
   message?: string;
 }
+
+// Lấy danh sách môn học của học sinh
+export const getStudentSubjects = async (studentId: number, semester?: number, schoolYear?: string): Promise<StudentSubject[]> => {
+  try {
+    console.log(`Đang lấy danh sách môn học của học sinh ID: ${studentId}`);
+    console.log(`Học kỳ: ${semester}, Năm học: ${schoolYear}`);
+    
+    // Tạo query params
+    const params: any = {};
+    if (semester) params.semester = semester;
+    if (schoolYear) params.school_year = schoolYear;
+    
+    console.log('Request URL:', `/students/${studentId}/subjects`);
+    console.log('Request params:', params);
+    
+    const response = await axiosClient.get(`/students/${studentId}/subjects`, { params });
+    
+    console.log('Phản hồi từ API - status:', response.status);
+    console.log('Phản hồi từ API - headers:', response.headers);
+    console.log('Phản hồi từ API - data:', JSON.stringify(response.data, null, 2));
+    
+    // Kiểm tra nếu API trả về lỗi
+    if (response.data && response.data.error) {
+      console.warn('API trả về lỗi:', response.data.error);
+      toast.error(response.data.error);
+      return [];
+    }
+    
+    // Nếu API trả về dữ liệu
+    if (response.data && Array.isArray(response.data)) {
+      console.log('Số lượng môn học nhận được:', response.data.length);
+      
+      // Thêm thông tin semester và school_year vào mỗi môn học nếu chưa có
+      const subjectsWithSemesterInfo = response.data.map(subject => ({
+        ...subject,
+        semester: subject.semester || semester || 1,
+        school_year: subject.school_year || schoolYear || '2023-2024'
+      }));
+      
+      return subjectsWithSemesterInfo;
+    }
+    
+    // Nếu không có dữ liệu, trả về mảng rỗng
+    console.warn('API không trả về dữ liệu môn học nào.');
+    toast.warning('Không tìm thấy dữ liệu môn học');
+    return [];
+  } catch (error) {
+    console.error(`Lỗi khi lấy danh sách môn học của học sinh ${studentId}:`, error);
+    
+    // Log chi tiết lỗi
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error status:', error.response.status);
+      console.error('Error data:', error.response.data);
+      console.error('Request config:', error.config);
+    }
+    
+    toast.error('Không thể tải danh sách môn học');
+    
+    // Trả về mảng rỗng khi có lỗi
+    return [];
+  }
+};
 
 const subjectService = {
   // Lấy danh sách môn học

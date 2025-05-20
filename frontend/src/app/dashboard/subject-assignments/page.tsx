@@ -69,6 +69,31 @@ export default function SubjectAssignmentPage() {
       Header: 'Tiết học',
       accessor: 'lesson_period',
       Cell: ({ value }: { value: string | null | undefined }) => value || 'Chưa phân tiết'
+    },
+    {
+      Header: 'Thứ',
+      accessor: 'day_of_week',
+      Cell: ({ value }: { value: string | null | undefined }) => value || 'Chưa xác định'
+    },
+    {
+      Header: 'Tiết',
+      accessor: 'period',
+      Cell: ({ value }: { value: number | null | undefined }) => value || '-'
+    },
+    {
+      Header: 'Phòng',
+      accessor: 'room',
+      Cell: ({ value }: { value: string | null | undefined }) => value || 'Chưa xác định'
+    },
+    {
+      Header: 'Học kỳ',
+      accessor: 'semester',
+      Cell: ({ value }: { value: number | null | undefined }) => value || 1
+    },
+    {
+      Header: 'Năm học',
+      accessor: 'school_year',
+      Cell: ({ value }: { value: string | null | undefined }) => value || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
     }
   ];
   
@@ -109,7 +134,12 @@ export default function SubjectAssignmentPage() {
         teacher_id: parseInt(data.teacher_id),
         subject_id: parseInt(data.subject_id),
         class_id: data.class_id ? parseInt(data.class_id) : null,
-        lesson_period: data.lesson_period || null
+        lesson_period: data.lesson_period || null,
+        day_of_week: data.day_of_week || null,
+        period: data.period ? parseInt(data.period) : null,
+        room: data.room || null,
+        semester: data.semester ? parseInt(data.semester) : 1,
+        school_year: data.school_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
       };
       
       const result = await teacherSubjectService.create(submissionData);
@@ -137,7 +167,12 @@ export default function SubjectAssignmentPage() {
         teacher_id: parseInt(data.teacher_id),
         subject_id: parseInt(data.subject_id),
         class_id: data.class_id ? parseInt(data.class_id) : null,
-        lesson_period: data.lesson_period || null
+        lesson_period: data.lesson_period || null,
+        day_of_week: data.day_of_week || null,
+        period: data.period ? parseInt(data.period) : null,
+        room: data.room || null,
+        semester: data.semester ? parseInt(data.semester) : 1,
+        school_year: data.school_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
       };
       
       const result = await teacherSubjectService.update(selectedItem.id, submissionData);
@@ -216,7 +251,12 @@ export default function SubjectAssignmentPage() {
                 teacher_id: selectedItem.teacher_id.toString(),
                 subject_id: selectedItem.subject_id.toString(),
                 class_id: selectedItem.class_id?.toString() || '',
-                lesson_period: selectedItem.lesson_period || ''
+                lesson_period: selectedItem.lesson_period || '',
+                day_of_week: selectedItem.day_of_week || '',
+                period: selectedItem.period || 0,
+                room: selectedItem.room || '',
+                semester: selectedItem.semester || 1,
+                school_year: selectedItem.school_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
               } : undefined}
               onSubmit={isEditMode ? handleUpdate : handleCreate}
               onCancel={handleCloseModal}

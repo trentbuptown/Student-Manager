@@ -12,7 +12,11 @@ class TeacherSubject extends Model
         'teacher_id',
         'subject_id',
         'class_id',
-        'lesson_period'
+        'lesson_period',
+        'day_of_week',
+        'room',
+        'semester',
+        'school_year'
     ];
 
     public function teacher()

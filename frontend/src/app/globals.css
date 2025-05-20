@@ -33,10 +33,35 @@ body {
     color: var(--text-color);
 }
 
+/* Định dạng cho input number */
+.number-input {
+    /* Tăng kích thước khu vực nút tăng giảm */
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.number-input::-webkit-outer-spin-button,
+.number-input::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button !important;
+    opacity: 1 !important;
+    height: 20px;
+    width: 16px;
+    position: relative;
+    margin-left: 3px;
+}
+
+/* Hover trên nút tăng giảm */
+.number-input:hover::-webkit-inner-spin-button {
+    background-color: #f0f0f0;
+}
+
 /* Dark mode styles */
 .dark body {
     background-color: var(--background-color);
     color: var(--text-color);
+}
+
+.dark .number-input:hover::-webkit-inner-spin-button {
+    background-color: #444;
 }
 
 .dark .bg-white {

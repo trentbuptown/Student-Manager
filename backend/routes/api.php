@@ -45,11 +45,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('subjects', SubjectController::class);
     Route::apiResource('students', StudentController::class);
 
+    // Class Routes
+    Route::get('/classes/{class}/students', [ClassController::class, 'getStudents']);
+
+    // Student Routes mới
+    Route::get('/students/{student}/schedule', [StudentController::class, 'getSchedule']);
+    Route::get('/students/{student}/schedule/day', [StudentController::class, 'getSchedule']);
+    Route::get('/students/{student}/grades', [StudentController::class, 'getGrades']);
+    Route::get('/students/{student}/average-grade', [StudentController::class, 'getAverageGrade']);
+    Route::get('/students/{student}/rank', [StudentController::class, 'getRank']);
+    Route::get('/students/{student}/latest-semester', [StudentController::class, 'getLatestSemester']);
+    Route::get('/students/{student}/subjects', [StudentController::class, 'getSubjects']);
+
     // Teacher Subject Routes
     Route::apiResource('teacher-subjects', TeacherSubjectController::class);
     
     // Lấy danh sách lớp học của giáo viên
     Route::get('/teachers/{teacher}/classes', [TeacherController::class, 'getClasses']);
+    
+    // Lấy thời khóa biểu của giáo viên
+    Route::get('/teachers/{teacher}/schedule', [TeacherController::class, 'getSchedule']);
+    
+    // Lấy danh sách học sinh của giáo viên
+    Route::get('/teachers/{teacher}/students', [TeacherController::class, 'getStudents']);
+    
+    // Lấy danh sách học sinh của một lớp dạy cụ thể
+    Route::get('/teachers/{teacher}/classes/{class}/students', [TeacherController::class, 'getClassStudents']);
 
     // Endpoint cho quản lý điểm - phải đặt trước route resource
     Route::get('/scores/average', [ScoreController::class, 'calculateAverage']);
@@ -62,4 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/student/{student_id}', [ScoreController::class, 'getStudentReport']);
     Route::get('/reports/class/{class_id}', [ScoreController::class, 'getClassReport']);
     Route::get('/reports/subject/{subject_id}', [ScoreController::class, 'getSubjectReport']);
+    
+    // API đặc biệt để tạo/cập nhật điểm theo loại
+    Route::post('/scores/update-type', [ScoreController::class, 'updateTypeScore']);
 });

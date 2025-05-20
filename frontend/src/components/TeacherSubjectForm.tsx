@@ -15,6 +15,11 @@ type TeacherSubjectFormProps = {
     subject_id: string;
     class_id: string;
     lesson_period?: string;
+    day_of_week?: string;
+    period?: number;
+    room?: string;
+    semester?: number;
+    school_year?: string;
   };
   assignments: TeacherSubject[]; // Danh sách tất cả phân công
   currentId?: number; // ID của phân công đang được chỉnh sửa
@@ -24,13 +29,27 @@ type TeacherSubjectFormProps = {
 };
 
 const DAYS_OF_WEEK = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-const DAYS_OF_WEEK_FULL = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+const DAYS_OF_WEEK_FULL = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy', 'Chủ nhật'];
 const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // Chuyển đổi tên ngày đầy đủ sang tên viết tắt
 const fullNameToShortName = (fullName: string): string => {
-  const index = DAYS_OF_WEEK_FULL.indexOf(fullName);
-  return index !== -1 ? DAYS_OF_WEEK[index] : fullName;
+  // Xử lý trường hợp "Thứ 2" hoặc "Thứ hai"
+  for (let i = 0; i < DAYS_OF_WEEK_FULL.length; i++) {
+    if (fullName.includes(DAYS_OF_WEEK_FULL[i]) || 
+        fullName.toLowerCase().includes(DAYS_OF_WEEK_FULL[i].toLowerCase())) {
+      return DAYS_OF_WEEK[i];
+    }
+  }
+  
+  // Kiểm tra theo số (Thứ 2, Thứ 3, ...)
+  for (let i = 2; i <= 7; i++) {
+    if (fullName.includes(`Thứ ${i}`)) {
+      return `T${i}`;
+    }
+  }
+  
+  return fullName;
 };
 
 // Chuyển đổi tên viết tắt sang tên đầy đủ
@@ -54,14 +73,24 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
     teacher_id: initialData?.teacher_id || '',
     subject_id: initialData?.subject_id || '',
     class_id: initialData?.class_id || '',
-    lesson_period: initialData?.lesson_period || ''
+    lesson_period: initialData?.lesson_period || '',
+    day_of_week: initialData?.day_of_week || '',
+    period: initialData?.period || '',
+    room: initialData?.room || '',
+    semester: initialData?.semester || 1,
+    school_year: initialData?.school_year || `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`
   });
 
   const [errors, setErrors] = useState({
     teacher_id: '',
     subject_id: '',
     class_id: '',
-    lesson_period: ''
+    lesson_period: '',
+    day_of_week: '',
+    period: '',
+    room: '',
+    semester: '',
+    school_year: ''
   });
 
   // Trạng thái cho xung đột tiết học
@@ -77,14 +106,23 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
       const periodEntries = initialData.lesson_period.split(', ');
       
       periodEntries.forEach(entry => {
-        // Phân tích cú pháp như "Tiết 1-2 Thứ 2"
-        const match = entry.match(/Tiết (\d+)-(\d+) (.*)/);
+        // Xử lý nhiều định dạng có thể có: "Tiết 1-2 Thứ 2", "Tiết 1-2 Thứ hai", v.v.
+        let match = entry.match(/Tiết (\d+)-(\d+) (.*)/);
+        // Nếu không khớp, thử định dạng khác: "Thứ hai:1,2" hoặc "Thứ 2:1-3"
+        if (!match) {
+          match = entry.match(/(.*):(\d+)[-,](\d+)/);
+          if (match) {
+            // Đảo vị trí để phù hợp với định dạng gốc
+            match = [entry, match[2], match[3], match[1]];
+          }
+        }
+
         if (match) {
           const startPeriod = parseInt(match[1]);
           const endPeriod = parseInt(match[2]);
           const day = match[3];
           
-          // Chuyển đổi tên ngày đầy đủ sang viết tắt để hiển thị đúng
+          // Chuyển đổi tên ngày đầy đủ sang viết tắt
           const shortDay = fullNameToShortName(day);
           
           for (let i = startPeriod; i <= endPeriod; i++) {
@@ -140,15 +178,84 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
   const handlePeriodToggle = (day: string, period: number) => {
     const key = `${day}_${period}`;
     
-    setSelectedPeriods(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+    // Cập nhật selectedPeriods trực tiếp
+    const newSelectedPeriods = {
+      ...selectedPeriods,
+      [key]: !selectedPeriods[key]
+    };
+    setSelectedPeriods(newSelectedPeriods);
     
-    // Cập nhật lesson_period dựa trên các tiết đã chọn
-    setTimeout(() => {
-      updateLessonPeriodFromSelection();
-    }, 0);
+    // Cập nhật lesson_period ngay lập tức
+    const periodsByDay: {[key: string]: number[]} = {};
+    
+    // Nhóm các tiết theo ngày
+    Object.keys(newSelectedPeriods).forEach(k => {
+      if (newSelectedPeriods[k]) {
+        const [d, periodStr] = k.split('_');
+        const p = parseInt(periodStr);
+        
+        // Chuyển đổi tên viết tắt sang tên đầy đủ để lưu trữ
+        const fullDay = shortNameToFullName(d);
+        
+        if (!periodsByDay[fullDay]) {
+          periodsByDay[fullDay] = [];
+        }
+        
+        periodsByDay[fullDay].push(p);
+      }
+    });
+    
+    // Chuyển đổi thành chuỗi
+    const periodStrings: string[] = [];
+    let firstDay = '';
+    let firstPeriod = 0;
+    
+    Object.keys(periodsByDay).forEach((d, index) => {
+      const periods = periodsByDay[d].sort((a, b) => a - b);
+      
+      // Lưu ngày đầu tiên và tiết đầu tiên cho các trường day_of_week và period
+      if (index === 0) {
+        firstDay = d;
+        firstPeriod = periods[0];
+      }
+      
+      // Nhóm các tiết liên tiếp
+      const ranges: [number, number][] = [];
+      
+      if (periods.length > 0) {
+        let start = periods[0];
+        let end = periods[0];
+        
+        for (let i = 1; i < periods.length; i++) {
+          if (periods[i] === end + 1) {
+            end = periods[i];
+          } else {
+            ranges.push([start, end]);
+            start = periods[i];
+            end = periods[i];
+          }
+        }
+        
+        ranges.push([start, end]);
+      }
+      
+      // Tạo chuỗi cho mỗi dải tiết
+      ranges.forEach(([start, end]) => {
+        if (start === end) {
+          periodStrings.push(`${d}:${start}`);
+        } else {
+          periodStrings.push(`${d}:${start}-${end}`);
+        }
+      });
+    });
+    
+    // Cập nhật formData
+    setFormData(prev => ({
+      ...prev,
+      lesson_period: periodStrings.join(', '),
+      day_of_week: firstDay || prev.day_of_week,
+      period: firstPeriod || prev.period
+    }));
   };
 
   // Cập nhật trường lesson_period từ các tiết đã chọn
@@ -161,7 +268,7 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
         const [day, periodStr] = key.split('_');
         const period = parseInt(periodStr);
         
-        // Chuyển đổi tên viết tắt sang tên đầy đủ để lưu trữ
+        // Chuyển đổi tên viết tắt sang tên đầy đủ
         const fullDay = shortNameToFullName(day);
         
         if (!periodsByDay[fullDay]) {
@@ -172,7 +279,7 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
       }
     });
     
-    // Chuyển đổi thành chuỗi định dạng "Tiết X-Y thứ Z"
+    // Chuyển đổi thành chuỗi
     const periodStrings: string[] = [];
     
     Object.keys(periodsByDay).forEach(day => {
@@ -200,7 +307,11 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
       
       // Tạo chuỗi cho mỗi dải tiết
       ranges.forEach(([start, end]) => {
-        periodStrings.push(`Tiết ${start}-${end} ${day}`);
+        if (start === end) {
+          periodStrings.push(`${day}:${start}`);
+        } else {
+          periodStrings.push(`${day}:${start}-${end}`);
+        }
       });
     });
     
@@ -332,6 +443,94 @@ const TeacherSubjectForm: React.FC<TeacherSubjectFormProps> = ({
               </select>
               <p className="text-gray-500 text-xs mt-1">
                 Nếu không chọn lớp, giáo viên sẽ được phân công môn học nhưng chưa được gán lớp
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Học kỳ
+                </label>
+                <select
+                  name="semester"
+                  value={formData.semester}
+                  onChange={handleChange}
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                >
+                  <option value="1">Học kỳ 1</option>
+                  <option value="2">Học kỳ 2</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Năm học
+                </label>
+                <input
+                  type="text"
+                  name="school_year"
+                  value={formData.school_year}
+                  onChange={handleChange}
+                  placeholder="VD: 2025-2026"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Phòng học
+                </label>
+                <input
+                  type="text"
+                  name="room"
+                  value={formData.room}
+                  onChange={handleChange}
+                  placeholder="VD: A101"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 text-sm font-medium mb-1">
+                  Tiết học (thủ công)
+                </label>
+                <input
+                  type="number"
+                  name="period"
+                  value={formData.period}
+                  onChange={handleChange}
+                  min="1"
+                  max="10"
+                  placeholder="VD: 1"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+                />
+                <p className="text-gray-500 text-xs mt-1">
+                  Tiết học sẽ được tự động cập nhật từ bảng bên phải
+                </p>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">
+                Thứ trong tuần
+              </label>
+              <select
+                name="day_of_week"
+                value={formData.day_of_week}
+                onChange={handleChange}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+              >
+                <option value="">-- Chọn thứ --</option>
+                {DAYS_OF_WEEK_FULL.map((day, index) => (
+                  <option key={index} value={day}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+              <p className="text-gray-500 text-xs mt-1">
+                Thứ trong tuần sẽ được tự động cập nhật từ bảng bên phải
               </p>
             </div>
 

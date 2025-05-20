@@ -37,8 +37,20 @@ export default function TeacherDashboard() {
             
             // Lấy danh sách lớp học của giáo viên
             const teacherClasses = await getTeacherClasses(userData.teacher.id);
+            console.log('Teacher Classes Data:', teacherClasses);
+            
             if (teacherClasses) {
-              setClasses(teacherClasses);
+              // Kiểm tra định dạng dữ liệu trả về từ API
+              if ('data' in teacherClasses && Array.isArray(teacherClasses.data)) {
+                console.log('Setting classes from data property:', teacherClasses.data);
+                setClasses(teacherClasses.data);
+              } else if (Array.isArray(teacherClasses)) {
+                console.log('Setting classes from array directly:', teacherClasses);
+                setClasses(teacherClasses);
+              } else {
+                console.log('Classes data is not in expected format:', teacherClasses);
+                setClasses([]);
+              }
             }
             
             // Lấy thời khóa biểu của giáo viên
@@ -100,9 +112,18 @@ export default function TeacherDashboard() {
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h2 className="text-lg font-medium mb-4">Lớp chủ nhiệm</h2>
           <p className="text-gray-600">
-            {user?.teacher?.is_gvcn ? 
-              (classes.find(c => c.is_homeroom)?.name || 'Đang cập nhật') : 
-              'Bạn không phải là giáo viên chủ nhiệm.'}
+            {user?.teacher?.is_gvcn ? (
+              <>
+                {console.log('Classes for homeroom:', classes)}
+                {classes.find(c => c.is_homeroom === true)?.class_name || 
+                 classes.find(c => c.is_homeroom)?.class_name ||
+                 classes.find(c => c.is_homeroom_class)?.class_name ||
+                 (classes.length === 1 ? classes[0].class_name : null) ||
+                 'Đang cập nhật - Không tìm thấy lớp chủ nhiệm trong dữ liệu'}
+              </>
+            ) : (
+              'Bạn không phải là giáo viên chủ nhiệm.'
+            )}
           </p>
         </div>
         
@@ -117,8 +138,8 @@ export default function TeacherDashboard() {
             <div className="grid grid-cols-2 gap-4">
               {classes.map((classItem, index) => (
                 <div key={index} className="p-3 border rounded-md">
-                  <p className="font-medium">{classItem.name}</p>
-                  <p className="text-sm text-gray-500">{classItem.subject || 'Chưa có môn học'}</p>
+                  <p className="font-medium">{classItem.class_name}</p>
+                  <p className="text-sm text-gray-500">{classItem.subject_name || 'Chưa có môn học'}</p>
                 </div>
               ))}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Teacher } from '@/services/teacherService';
 import { Subject } from '@/services/subjectService';
 import { Class } from '@/services/classService';
@@ -10,18 +10,19 @@ type ScoreFilterProps = {
   teachers: Teacher[];
   subjects: Subject[];
   classes: Class[];
+  students: any[];
   schoolYears: string[];
   onFilter: (filters: ScoreFilter) => void;
   onReset: () => void;
 };
 
+// Định nghĩa các loại điểm với labels chuẩn hóa
 const SCORE_TYPES = [
   { value: '', label: 'Tất cả loại điểm' },
-  { value: 'mieng', label: 'Điểm miệng' },
-  { value: '15p', label: 'Điểm 15 phút' },
-  { value: '1tiet', label: 'Điểm 1 tiết' },
-  { value: 'giuaky', label: 'Điểm giữa kỳ' },
-  { value: 'cuoiky', label: 'Điểm cuối kỳ' }
+  { value: 'test15min', label: 'Kiểm tra 15 phút' },
+  { value: 'test45min', label: 'Kiểm tra 45 phút' },
+  { value: 'oral', label: 'Kiểm tra miệng' },
+  { value: 'final', label: 'Kiểm tra cuối kỳ' }
 ];
 
 const SEMESTERS = [
@@ -35,6 +36,7 @@ type StringFilters = {
   class_id: string;
   subject_id: string;
   teacher_id: string;
+  student_id: string;
   semester: string;
   school_year: string;
   score_type: string;
@@ -44,6 +46,7 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
   teachers,
   subjects,
   classes,
+  students,
   schoolYears,
   onFilter,
   onReset
@@ -52,18 +55,40 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
     class_id: '',
     subject_id: '',
     teacher_id: '',
+    student_id: '',
     semester: '',
     school_year: '',
     score_type: ''
   });
 
+  const [filteredStudents, setFilteredStudents] = useState<any[]>(students);
+
+  // Lọc học sinh theo lớp
+  useEffect(() => {
+    if (filters.class_id) {
+      setFilteredStudents(students.filter(student => 
+        student.class_id === parseInt(filters.class_id)));
+    } else {
+      setFilteredStudents(students);
+    }
+  }, [filters.class_id, students]);
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    // Nếu thay đổi lớp, reset học sinh đã chọn
+    if (name === 'class_id') {
+      setFilters(prev => ({
+        ...prev,
+        [name]: value,
+        student_id: '' // Reset student_id khi thay đổi lớp
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -74,6 +99,7 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
       class_id: filters.class_id ? parseInt(filters.class_id) : undefined,
       subject_id: filters.subject_id ? parseInt(filters.subject_id) : undefined,
       teacher_id: filters.teacher_id ? parseInt(filters.teacher_id) : undefined,
+      student_id: filters.student_id ? parseInt(filters.student_id) : undefined,
       semester: filters.semester ? parseInt(filters.semester) : undefined,
       school_year: filters.school_year || undefined,
       score_type: filters.score_type || undefined
@@ -87,6 +113,7 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
       class_id: '',
       subject_id: '',
       teacher_id: '',
+      student_id: '',
       semester: '',
       school_year: '',
       score_type: ''
@@ -100,7 +127,7 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
       <h3 className="text-lg font-medium text-gray-700 mb-3">Bộ lọc điểm</h3>
       
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           <div>
             <label className="block text-gray-700 text-xs font-medium mb-1">
               Lớp học
@@ -115,6 +142,25 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
               {classes.map(classItem => (
                 <option key={classItem.id} value={classItem.id.toString()}>
                   {classItem.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-xs font-medium mb-1">
+              Học sinh
+            </label>
+            <select
+              name="student_id"
+              value={filters.student_id}
+              onChange={handleChange}
+              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md"
+            >
+              <option value="">Tất cả học sinh</option>
+              {filteredStudents.map(student => (
+                <option key={student.id} value={student.id.toString()}>
+                  {student.name || student.user?.name}
                 </option>
               ))}
             </select>
@@ -218,13 +264,13 @@ const ScoreFilterComponent: React.FC<ScoreFilterProps> = ({
           <button
             type="button"
             onClick={handleReset}
-            className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
+            className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
           >
             Đặt lại
           </button>
           <button
             type="submit"
-            className="px-2 py-1 text-xs text-white bg-blue-600 rounded hover:bg-blue-700"
+            className="px-3 py-1.5 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
           >
             Áp dụng
           </button>

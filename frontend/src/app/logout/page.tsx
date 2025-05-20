@@ -16,11 +16,15 @@ export default function LogoutPage() {
         console.log('Đã gọi hàm logout thành công');
       } catch (error) {
         // Ghi log lỗi nhưng không ngăn chặn chuyển hướng
-        console.error('Lỗi không xử lý được khi đăng xuất:', error);
+        console.error('Lỗi khi đăng xuất:', error);
       } finally {
-        // Luôn chuyển hướng về trang đăng nhập, ngay cả khi có lỗi
-        console.log('Chuyển hướng đến trang đăng nhập');
-        router.push('/sign-in');
+        // Đợi một chút trước khi chuyển hướng
+        setTimeout(() => {
+          console.log('Chuyển hướng đến trang đăng nhập');
+          router.push('/sign-in');
+          // Thêm reload trang để đảm bảo tất cả state được xóa
+          window.location.href = '/sign-in';
+        }, 500);
       }
     };
     

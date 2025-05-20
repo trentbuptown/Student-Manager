@@ -22,7 +22,17 @@ export default function TeacherClasses() {
             // Lấy danh sách lớp học của giáo viên
             const teacherClasses = await getTeacherClasses(userData.teacher.id);
             if (teacherClasses) {
-              setClasses(teacherClasses);
+              // Kiểm tra định dạng dữ liệu trả về từ API
+              if (teacherClasses.status === 'success' && Array.isArray(teacherClasses.data)) {
+                console.log('Setting classes from API data:', teacherClasses.data);
+                setClasses(teacherClasses.data);
+              } else if (Array.isArray(teacherClasses)) {
+                console.log('Setting classes from direct array:', teacherClasses);
+                setClasses(teacherClasses);
+              } else {
+                console.log('Classes data format not recognized:', teacherClasses);
+                setClasses([]);
+              }
             }
           }
         } catch (error) {
@@ -35,6 +45,13 @@ export default function TeacherClasses() {
     
     loadData();
   }, []);
+
+  useEffect(() => {
+    // Debug: log dữ liệu classes khi đã tải xong
+    if (!loading) {
+      console.log('Classes data for rendering:', classes);
+    }
+  }, [loading, classes]);
 
   if (loading) {
     return (
@@ -74,10 +91,10 @@ export default function TeacherClasses() {
               {classes.map((classItem, index) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{classItem.name}</div>
+                    <div className="text-sm font-medium text-gray-900">{classItem.class_name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{classItem.subject || 'Chưa có môn học'}</div>
+                    <div className="text-sm text-gray-500">{classItem.subject_name || 'Chưa có môn học'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{classItem.student_count || 0}</div>
