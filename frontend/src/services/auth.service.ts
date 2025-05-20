@@ -115,26 +115,33 @@ export const logout = async (): Promise<void> => {
                 if (error.response?.status === 401) {
                     console.log('Lỗi 401 khi đăng xuất: Phiên đã hết hạn hoặc token không hợp lệ');
                 } else {
-                    console.log('Lỗi khi gọi API đăng xuất, vẫn tiếp tục quá trình đăng xuất local');
-                    console.error('Chi tiết lỗi:', error);
+                    console.error('Lỗi khi gọi API đăng xuất, vẫn tiếp tục quá trình đăng xuất local', error);
                 }
+                // Không throw lỗi ở đây để đảm bảo tiếp tục xử lý đăng xuất local
             }
         } else {
             console.log('Không có token để đăng xuất qua API');
         }
-    } finally {
+        
+        // Luôn xóa token và user khỏi localStorage, ngay cả khi API call thất bại
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Xóa cookie auth_token và user_role
+        deleteCookie('auth_token');
+        deleteCookie('user_role');
+        
+        console.log('Đã xóa token và thông tin người dùng khỏi localStorage và cookie');
+    } catch (e) {
+        console.error('Lỗi khi xử lý đăng xuất:', e);
+        // Đảm bảo vẫn cố gắng xóa dữ liệu đăng nhập, ngay cả khi có lỗi
         try {
-            // Luôn xóa token và user khỏi localStorage, ngay cả khi API call thất bại
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            
-            // Xóa cookie auth_token và user_role
             deleteCookie('auth_token');
             deleteCookie('user_role');
-            
-            console.log('Đã xóa token và thông tin người dùng khỏi localStorage và cookie');
-        } catch (e) {
-            console.error('Lỗi khi xóa dữ liệu đăng nhập local:', e);
+        } catch (innerError) {
+            console.error('Lỗi khi xóa dữ liệu đăng nhập:', innerError);
         }
     }
 };

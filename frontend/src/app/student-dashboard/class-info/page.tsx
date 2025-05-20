@@ -3,66 +3,58 @@
 import { useEffect, useState } from 'react';
 import { getUser } from '@/utils/auth';
 import { FaUserFriends, FaUser, FaChalkboardTeacher, FaSearch } from 'react-icons/fa';
-
-interface ClassInfo {
-  id: number;
-  name: string;
-  homeroom_teacher: string;
-  student_count: number;
-  year: string;
-}
-
-interface Student {
-  id: number;
-  name: string;
-  gender: string;
-  birth_date: string;
-  email: string;
-  phone: string;
-  address: string;
-}
+import { getStudentClass, getClassmatesOfStudent, ClassInfo as ClassInfoType, ClassStudent } from '@/services/classService';
+import { toast } from 'react-toastify';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
 
 export default function ClassInfo() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [classInfo, setClassInfo] = useState<ClassInfo | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [classInfo, setClassInfo] = useState<ClassInfoType | null>(null);
+  const [students, setStudents] = useState<ClassStudent[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {
       if (typeof window !== 'undefined') {
-        const userData = getUser();
-        if (!userData) return;
-        
-        setUser(userData);
-        
         try {
-          // Tạo dữ liệu mẫu cho lớp học
-          const sampleClassInfo: ClassInfo = {
-            id: 1,
-            name: '12A1',
-            homeroom_teacher: 'Nguyễn Văn A',
-            student_count: 35,
-            year: '2023-2024'
-          };
+          // Lấy thông tin người dùng
+          const userData = getUser();
+          if (!userData) {
+            setError("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+            setLoading(false);
+            return;
+          }
           
-          setClassInfo(sampleClassInfo);
+          setUser(userData);
           
-          // Tạo dữ liệu mẫu cho danh sách học sinh
-          const sampleStudents: Student[] = Array(35).fill(0).map((_, index) => ({
-            id: index + 1,
-            name: `Học sinh ${index + 1}`,
-            gender: index % 2 === 0 ? 'Nam' : 'Nữ',
-            birth_date: '2005-01-01',
-            email: `student${index + 1}@example.com`,
-            phone: '0123456789',
-            address: 'TP. Hồ Chí Minh'
-          }));
+          // Kiểm tra xem có thông tin học sinh không
+          if (!userData.student || !userData.student.id) {
+            setError("Không tìm thấy thông tin học sinh. Vui lòng liên hệ quản trị viên.");
+            setLoading(false);
+            return;
+          }
           
-          setStudents(sampleStudents);
+          // Lấy thông tin lớp học của học sinh
+          const studentId = userData.student.id;
+          console.log('Đang tải thông tin lớp học cho học sinh ID:', studentId);
+          
+          // Gọi API để lấy thông tin lớp học
+          const classData = await getStudentClass(studentId);
+          console.log('Đã nhận được thông tin lớp học:', classData);
+          setClassInfo(classData);
+          
+          // Gọi API để lấy danh sách học sinh trong lớp
+          const studentsData = await getClassmatesOfStudent(studentId);
+          console.log('Đã nhận được danh sách học sinh:', studentsData);
+          setStudents(studentsData);
+          
         } catch (error) {
           console.error('Lỗi khi tải dữ liệu lớp học:', error);
+          toast.error('Không thể tải thông tin lớp học');
+          setError("Đã xảy ra lỗi khi tải thông tin lớp học. Vui lòng thử lại sau.");
         } finally {
           setLoading(false);
         }
@@ -75,16 +67,38 @@ export default function ClassInfo() {
   // Lọc học sinh theo từ khóa tìm kiếm
   const filteredStudents = students.filter(student => 
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (student.user?.email && student.user.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Danh sách cán bộ lớp
+  const classOfficers = students.filter(student => student.class_position);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center">
-        <p className="text-gray-600">Đang tải dữ liệu...</p>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Lỗi! </strong>
+        <span className="block sm:inline">{error}</span>
+      </div>
+    );
+  }
+
+  // Format ngày sinh theo định dạng dd/MM/yyyy
+  const formatBirthDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy', { locale: vi });
+    } catch (error) {
+      return dateString;
+    }
+  };
 
   return (
     <>
@@ -99,6 +113,9 @@ export default function ClassInfo() {
             <div>
               <h3 className="text-sm font-medium text-gray-500">Lớp</h3>
               <p className="text-xl font-semibold">{classInfo.name}</p>
+              {classInfo.grade && (
+                <p className="text-sm text-gray-500">{classInfo.grade.name}</p>
+              )}
             </div>
           </div>
           
@@ -108,7 +125,7 @@ export default function ClassInfo() {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Giáo viên chủ nhiệm</h3>
-              <p className="text-xl font-semibold">{classInfo.homeroom_teacher}</p>
+              <p className="text-xl font-semibold">{classInfo.teacher?.name || 'Chưa phân công'}</p>
             </div>
           </div>
           
@@ -118,7 +135,7 @@ export default function ClassInfo() {
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Sĩ số</h3>
-              <p className="text-xl font-semibold">{classInfo.student_count} học sinh</p>
+              <p className="text-xl font-semibold">{students.length || classInfo.students_count || 0} học sinh</p>
             </div>
           </div>
         </div>
@@ -164,6 +181,9 @@ export default function ClassInfo() {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Số điện thoại
                 </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Chức vụ
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -173,10 +193,15 @@ export default function ClassInfo() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{student.name}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.gender}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.birth_date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.phone}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {student.gender === 'male' ? 'Nam' : 
+                     student.gender === 'female' ? 'Nữ' : 
+                     student.gender}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatBirthDate(student.birth_date)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.user?.email || ''}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.phone || ''}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.class_position || ''}</td>
                 </tr>
               ))}
             </tbody>
@@ -190,41 +215,20 @@ export default function ClassInfo() {
         )}
       </div>
       
-      <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-medium mb-4">Ban cán sự lớp</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Lớp trưởng</h3>
-            <p className="text-gray-600">Học sinh 1</p>
-          </div>
+      {classOfficers.length > 0 && (
+        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-medium mb-4">Ban cán sự lớp</h2>
           
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Lớp phó học tập</h3>
-            <p className="text-gray-600">Học sinh 2</p>
-          </div>
-          
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Lớp phó đời sống</h3>
-            <p className="text-gray-600">Học sinh 3</p>
-          </div>
-          
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Bí thư</h3>
-            <p className="text-gray-600">Học sinh 4</p>
-          </div>
-          
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Phó bí thư</h3>
-            <p className="text-gray-600">Học sinh 5</p>
-          </div>
-          
-          <div className="p-4 border rounded-lg">
-            <h3 className="font-medium">Thủ quỹ</h3>
-            <p className="text-gray-600">Học sinh 6</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {classOfficers.map((officer) => (
+              <div key={officer.id} className="p-4 border rounded-lg">
+                <h3 className="font-medium">{officer.class_position}</h3>
+                <p className="text-gray-600">{officer.name}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 } 

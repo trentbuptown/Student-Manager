@@ -523,72 +523,149 @@ class ScoreController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Lấy thông tin lớp học
-        $class = Classes::findOrFail($class_id);
-        
-        // Lấy danh sách học sinh trong lớp
-        $students = Student::where('class_id', $class_id)->get();
-        
-        $classReport = [
-            'class' => [
-                'id' => $class->id,
-                'name' => $class->name,
-                'grade' => $class->grade ? $class->grade->name : null
-            ],
-            'students' => []
-        ];
-        
-        foreach ($students as $student) {
-            $query = Score::where('student_id', $student->id);
+        try {
+            // Lấy thông tin lớp học
+            $class = Classes::findOrFail($class_id);
             
-            // Lọc theo môn học nếu có
+            // Lấy thông tin môn học nếu có
+            $subject = null;
             if ($request->has('subject_id')) {
-                $query->where('subject_id', $request->subject_id);
+                $subject = Subject::find($request->subject_id);
             }
             
-            // Lọc theo học kỳ nếu có
-            if ($request->has('semester')) {
-                $query->where('semester', $request->semester);
-            }
+            // Lấy danh sách học sinh trong lớp
+            $students = Student::where('class_id', $class_id)->get();
             
-            // Lọc theo năm học nếu có
-            if ($request->has('school_year')) {
-                $query->where('school_year', $request->school_year);
-            }
-            
-            $scores = $query->with('subject')->get();
-            
-            // Nhóm điểm theo môn học
-            $subjectScores = [];
-            foreach ($scores as $score) {
-                $subjectId = $score->subject_id;
-                if (!isset($subjectScores[$subjectId])) {
-                    $subjectScores[$subjectId] = [
-                        'subject' => $score->subject,
-                        'scores' => []
-                    ];
-                }
-                $subjectScores[$subjectId]['scores'][] = [
-                    'id' => $score->id,
-                    'score_value' => $score->score_value,
-                    'score_type' => $score->score_type
-                ];
-            }
-            
-            // Tính điểm trung bình cho từng môn học
-            foreach ($subjectScores as &$subjectData) {
-                $subjectData['average'] = $this->calculateSubjectAverage($subjectData['scores']);
-            }
-            
-            $classReport['students'][] = [
-                'id' => $student->id,
-                'name' => $student->name,
-                'code' => $student->code,
-                'subject_scores' => array_values($subjectScores)
+            $classReport = [
+                'class' => [
+                    'id' => $class->id,
+                    'name' => $class->name,
+                    'grade' => $class->grade ? $class->grade->name : null
+                ],
+                'subject' => $subject ? [
+                    'id' => $subject->id,
+                    'name' => $subject->name,
+                    'code' => $subject->code
+                ] : null,
+                'students' => []
             ];
+            
+            foreach ($students as $student) {
+                $studentData = [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'code' => $student->code,
+                    'grades' => []
+                ];
+                
+                $query = Score::query()
+                    ->where('student_id', $student->id);
+                
+                // Lọc theo môn học nếu có
+                if ($request->has('subject_id')) {
+                    $query->where('subject_id', $request->subject_id);
+                }
+                
+                // Lọc theo học kỳ nếu có
+                if ($request->has('semester')) {
+                    $query->where('semester', $request->semester);
+                }
+                
+                // Lọc theo năm học nếu có
+                if ($request->has('school_year')) {
+                    $query->where('school_year', $request->school_year);
+                }
+                
+                // Lọc theo giáo viên nếu có
+                if ($request->has('teacher_id')) {
+                    $query->where('teacher_id', $request->teacher_id);
+                }
+                
+                $scores = $query->get();
+                
+                // Nhóm điểm theo môn học và loại điểm
+                $gradesBySubject = [];
+                foreach ($scores as $score) {
+                    $subjectId = $score->subject_id;
+                    
+                    if (!isset($gradesBySubject[$subjectId])) {
+                        $gradesBySubject[$subjectId] = [
+                            'id' => $score->id,
+                            'subject_id' => $subjectId,
+                            'semester' => $score->semester,
+                            'school_year' => $score->school_year,
+                            'oral_test' => null,
+                            'fifteen_minute_test' => null,
+                            'forty_five_minute_test' => null,
+                            'final_exam' => null,
+                            'average_score' => null
+                        ];
+                    }
+                    
+                    // Ánh xạ loại điểm vào trường tương ứng
+                    switch ($score->score_type) {
+                        case 'oral':
+                        case 'mieng':
+                            $gradesBySubject[$subjectId]['oral_test'] = $score->score_value;
+                            break;
+                        case 'test15min':
+                        case '15p':
+                        case 'fifteen_minute':
+                            $gradesBySubject[$subjectId]['fifteen_minute_test'] = $score->score_value;
+                            break;
+                        case 'test45min':
+                        case '45p':
+                        case '1tiet':
+                        case 'forty_five_minute':
+                            $gradesBySubject[$subjectId]['forty_five_minute_test'] = $score->score_value;
+                            break;
+                        case 'final':
+                        case 'cuoiky':
+                        case 'final_exam':
+                            $gradesBySubject[$subjectId]['final_exam'] = $score->score_value;
+                            break;
+                        default:
+                            // Ghi log để debug loại điểm không khớp
+                            \Log::info('Loại điểm không khớp: ' . $score->score_type . ' cho học sinh ' . $student->name);
+                            break;
+                    }
+                }
+                
+                // Tính điểm trung bình cho từng môn học
+                foreach ($gradesBySubject as &$gradeData) {
+                    $scores = [
+                        $gradeData['oral_test'],
+                        $gradeData['fifteen_minute_test'],
+                        $gradeData['forty_five_minute_test'],
+                        $gradeData['final_exam']
+                    ];
+                    
+                    $weights = [1, 1, 2, 3];
+                    $totalWeightedScore = 0;
+                    $totalWeight = 0;
+                    
+                    foreach ($scores as $index => $score) {
+                        if ($score !== null) {
+                            $totalWeightedScore += $score * $weights[$index];
+                            $totalWeight += $weights[$index];
+                        }
+                    }
+                    
+                    $gradeData['average_score'] = $totalWeight > 0 ? 
+                        round($totalWeightedScore / $totalWeight, 2) : null;
+                }
+                
+                $studentData['grades'] = array_values($gradesBySubject);
+                $classReport['students'][] = $studentData;
+            }
+            
+            return response()->json($classReport);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi tải báo cáo lớp học: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
-        
-        return response()->json($classReport);
     }
 
     /**
@@ -720,5 +797,128 @@ class ScoreController extends Controller
         
         // Tính điểm trung bình cuối cùng
         return ($totalWeight > 0) ? round($totalWeightedScore / $totalWeight, 2) : null;
+    }
+
+    /**
+     * API đặc biệt để tạo hoặc cập nhật điểm theo loại (miệng, 15p, 45p, cuối kỳ)
+     */
+    public function updateTypeScore(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'student_id' => 'required|exists:students,id',
+                'subject_id' => 'required|exists:subjects,id',
+                'teacher_id' => 'required|exists:teachers,id',
+                'class_id' => 'required|exists:classes,id',
+                'semester' => 'required|integer|min:1|max:2',
+                'school_year' => 'required|string',
+                'score_type' => 'required|string|in:oral,test15min,test45min,final,mieng,15p,45p,1tiet,cuoiky',
+                'score_value' => 'required|numeric|min:0|max:10',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // Tìm điểm hiện có với cùng student_id, subject_id, score_type, semester, school_year
+            $existingScore = Score::where('student_id', $request->student_id)
+                ->where('subject_id', $request->subject_id)
+                ->where('semester', $request->semester)
+                ->where('school_year', $request->school_year)
+                ->where(function($query) use ($request) {
+                    // Kiểm tra các loại điểm tương đương
+                    switch($request->score_type) {
+                        case 'oral':
+                        case 'mieng':
+                            $query->whereIn('score_type', ['oral', 'mieng']);
+                            break;
+                        case 'test15min':
+                        case '15p':
+                        case 'fifteen_minute':
+                            $query->whereIn('score_type', ['test15min', '15p', 'fifteen_minute']);
+                            break;
+                        case 'test45min':
+                        case '45p':
+                        case '1tiet':
+                        case 'forty_five_minute':
+                            $query->whereIn('score_type', ['test45min', '45p', '1tiet', 'forty_five_minute']);
+                            break;
+                        case 'final':
+                        case 'cuoiky':
+                        case 'final_exam':
+                            $query->whereIn('score_type', ['final', 'cuoiky', 'final_exam']);
+                            break;
+                        default:
+                            $query->where('score_type', $request->score_type);
+                    }
+                })
+                ->first();
+
+            if ($existingScore) {
+                // Cập nhật điểm hiện có
+                $existingScore->score_value = $request->score_value;
+                $existingScore->teacher_id = $request->teacher_id;
+                $existingScore->class_id = $request->class_id;
+                $existingScore->save();
+
+                $score = $existingScore;
+            } else {
+                // Tạo điểm mới
+                $score = Score::create([
+                    'student_id' => $request->student_id,
+                    'subject_id' => $request->subject_id,
+                    'teacher_id' => $request->teacher_id,
+                    'class_id' => $request->class_id,
+                    'score_value' => $request->score_value,
+                    'score_type' => $request->score_type,
+                    'semester' => $request->semester,
+                    'school_year' => $request->school_year
+                ]);
+            }
+
+            $score->load(['student', 'subject', 'teacher', 'class']);
+            
+            // Định dạng lại dữ liệu để phù hợp với frontend
+            $formattedScore = [
+                'id' => $score->id,
+                'student_id' => $score->student_id,
+                'subject_id' => $score->subject_id,
+                'teacher_id' => $score->teacher_id, 
+                'class_id' => $score->class_id,
+                'score_value' => $score->score_value,
+                'score_type' => $score->score_type,
+                'semester' => $score->semester,
+                'school_year' => $score->school_year,
+                'created_at' => $score->created_at,
+                'updated_at' => $score->updated_at,
+                'student' => $score->student ? [
+                    'id' => $score->student->id,
+                    'name' => $score->student->name,
+                    'code' => $score->student->code ?? ''
+                ] : null,
+                'subject' => $score->subject ? [
+                    'id' => $score->subject->id,
+                    'name' => $score->subject->name,
+                    'code' => $score->subject->code ?? ''
+                ] : null,
+                'teacher' => $score->teacher ? [
+                    'id' => $score->teacher->id,
+                    'name' => $score->teacher->name
+                ] : null,
+                'class' => $score->class ? [
+                    'id' => $score->class->id,
+                    'name' => $score->class->name
+                ] : null
+            ];
+            
+            return response()->json($formattedScore, $existingScore ? 200 : 201);
+        } catch (\Exception $e) {
+            \Log::error('Lỗi khi cập nhật điểm: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật điểm',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 } 

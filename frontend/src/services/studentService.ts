@@ -38,10 +38,15 @@ export interface Student {
         id: number;
         name: string;
         grade_id: number;
+        teacher_id?: number;
         grade?: {
             id: number;
             name: string;
-        }
+        };
+        teacher?: {
+            id: number;
+            name: string;
+        };
     };
 }
 
@@ -83,7 +88,9 @@ export const getStudents = async (): Promise<Student[]> => {
 // Lấy thông tin chi tiết một học sinh
 export const getStudentById = async (id: number): Promise<Student> => {
     try {
+        console.log(`Đang gọi API để lấy thông tin học sinh với ID: ${id}`);
         const response = await axiosInstance.get(`/students/${id}`);
+        console.log(`Đã nhận được dữ liệu học sinh:`, response.data);
         return response.data;
     } catch (error) {
         console.error(`Error fetching student ${id}:`, error);
